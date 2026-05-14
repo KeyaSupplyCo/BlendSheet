@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ford 866 Production Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #f4f6f9;
+  --surface: #ffffff;
+  --surf2:   #f8fafc;
+  --border:  #e2e8f0;
+  --border2: #cbd5e1;
+  --txt:     #0f172a;
+  --txt2:    #475569;
+  --txt3:    #94a3b8;
+
+  --blue:    #2563eb;
+  --green:   #16a34a;
+  --amber:   #d97706;
+  --red:     #dc2626;
+  --violet:  #6d28d9;
+  --teal:    #0f766e;
+  --indigo:  #4338ca;
+  --sky:     #0284c7;
+  --slate:   #475569;
+  --dtp:     #1d4ed8;
+  --kcap:    #0f766e;
+  --truck:   #166534;
+  --u6xx:    #7c3aed;
+  --p703:    #0369a1;
+
+  /* chip palettes */
+  --cg-bg:#f0fdf4; --cg-bd:#bbf7d0; --cg-tx:#15803d;
+  --ca-bg:#fffbeb; --ca-bd:#fde68a; --ca-tx:#b45309;
+  --cr-bg:#fff1f2; --cr-bd:#fecdd3; --cr-tx:#be123c;
+  --cb-bg:#eff6ff; --cb-bd:#bfdbfe; --cb-tx:#1d4ed8;
+  --cv-bg:#f5f3ff; --cv-bd:#ddd6fe; --cv-tx:#6d28d9;
+  --ct-bg:#f0fdfa; --ct-bd:#99f6e4; --ct-tx:#0f766e;
+  --ci-bg:#eef2ff; --ci-bd:#c7d2fe; --ci-tx:#4338ca;
+  --cs-bg:#f0f9ff; --cs-bd:#bae6fd; --cs-tx:#0369a1;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;}
+
+/* ── TOP NAV ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.tb-brand{display:flex;align-items:center;gap:14px;}
+.tb-logo{width:36px;height:36px;border-radius:8px;background:var(--dtp);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;letter-spacing:-.5px;flex-shrink:0;}
+.tb-title{font-size:16px;font-weight:700;letter-spacing:-.3px;}
+.tb-sub{font-size:11px;color:var(--txt3);font-family:'DM Mono',monospace;}
+.tb-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tb-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);padding:3px 9px;background:var(--surf2);border:1px solid var(--border);border-radius:5px;}
+.tb-meta span{color:var(--txt2);font-weight:500;}
+#clock{font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);padding:3px 9px;background:var(--cb-bg);border:1px solid var(--cb-bd);border-radius:5px;}
+
+/* ── PAGE TAB SWITCHER ── */
+.page-tabs{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;gap:0;}
+.ptab{padding:10px 22px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.01em;}
+.ptab:hover{color:var(--txt2);}
+.ptab.active{color:var(--blue);border-bottom-color:var(--blue);}
+
+/* ── UPLOAD AREA ── */
+.upload-row{padding:18px 28px 0;display:flex;gap:14px;flex-wrap:wrap;}
+.file-slot{flex:1;min-width:240px;background:var(--surface);border:1.5px dashed var(--border2);border-radius:10px;padding:14px 18px;cursor:pointer;position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s;}
+.file-slot:hover,.file-slot.over{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08);}
+.file-slot input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.slot-top{display:flex;align-items:center;gap:10px;}
+.slot-icon{font-size:20px;}
+.slot-name{font-size:12px;font-weight:600;}
+.slot-desc{font-size:10px;color:var(--txt3);font-family:'DM Mono',monospace;margin-top:1px;}
+.slot-rows{margin-top:8px;display:flex;flex-direction:column;gap:3px;}
+.sr{display:flex;align-items:center;gap:7px;font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);}
+.sr.on{color:var(--txt2);}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:background .3s;}
+.dot.ok{background:var(--green);}
+
+/* ── FILTER + CHIPS ── */
+.filter-row{padding:12px 28px 0;display:none;align-items:center;gap:12px;flex-wrap:wrap;}
+.fl{font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);}
+.filter-row input[type=date]{background:var(--surface);border:1px solid var(--border2);color:var(--txt);padding:5px 9px;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;outline:none;}
+.filter-row input[type=date]:focus{border-color:var(--blue);}
+.btn{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.btn-p{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn-p:hover{background:#1d4ed8;}
+.btn-g{background:var(--surface);color:var(--txt2);border-color:var(--border2);}
+.btn-g:hover{border-color:var(--blue);color:var(--blue);}
+
+.chips-row{padding:12px 28px 0;display:flex;gap:7px;flex-wrap:wrap;}
+.chip{display:none;align-items:center;gap:8px;padding:5px 12px;border-radius:7px;border:1px solid;font-size:11px;font-weight:600;}
+.chip.show{display:flex;}
+.chip-n{font-family:'DM Mono',monospace;font-size:15px;font-weight:400;}
+.cg{background:var(--cg-bg);border-color:var(--cg-bd);color:var(--cg-tx);}
+.ca{background:var(--ca-bg);border-color:var(--ca-bd);color:var(--ca-tx);}
+.cr{background:var(--cr-bg);border-color:var(--cr-bd);color:var(--cr-tx);}
+.cb{background:var(--cb-bg);border-color:var(--cb-bd);color:var(--cb-tx);}
+
+.legend-row{padding:7px 28px 0;display:none;align-items:center;gap:14px;flex-wrap:wrap;}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txt3);}
+.ld{width:8px;height:8px;border-radius:2px;}
+
+/* ── MAIN ── */
+.page{display:none;padding:18px 28px 48px;}
+.page.active{display:block;}
+
+.group{margin-bottom:6px;}
+.group-label{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.group-pill{padding:3px 14px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;flex-shrink:0;}
+.gp-dtp {background:var(--dtp);}
+.gp-kcap{background:var(--kcap);}
+.gp-u6xx{background:var(--u6xx);}
+.gp-p703{background:var(--p703);}
+.group-div{flex:1;height:1px;background:var(--border);}
+
+.card-grid{display:grid;gap:14px;margin-bottom:20px;}
+.cg2{grid-template-columns:repeat(2,1fr);}
+.cg3{grid-template-columns:repeat(3,1fr);}
+
+/* ── SECTION CARD ── */
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.scard-hdr{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;border-left:3px solid;}
+.scard-hdr.ip  {border-left-color:var(--dtp);}
+.scard-hdr.cc  {border-left-color:var(--violet);}
+.scard-hdr.lh  {border-left-color:var(--sky);}
+.scard-hdr.rh  {border-left-color:var(--indigo);}
+.scard-hdr.u6  {border-left-color:var(--u6xx);}
+.scard-hdr.p3cc{border-left-color:var(--p703);}
+.scard-hdr.p3tfp{border-left-color:#0891b2;}
+.scard-name{font-size:13px;font-weight:700;}
+.scard-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);padding:2px 8px;background:var(--surf2);border:1px solid var(--border);border-radius:4px;}
+
+/* ── STAT BAR ── */
+.stat-bar{padding:9px 16px;background:var(--surf2);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;}
+.stat-item{flex:1;min-width:100px;padding:0 10px;border-right:1px solid var(--border);}
+.stat-item:first-child{padding-left:0;}
+.stat-item:last-child{border-right:none;}
+.stat-lbl{font-size:8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);margin-bottom:3px;}
+.stat-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:600;}
+.sv-g{color:var(--green);} .sv-b{color:var(--blue);} .sv-a{color:var(--amber);} .sv-s{color:var(--txt2);}
+
+/* ── TABLE ── */
+.scard-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{padding:6px 9px;text-align:center;font-size:8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);background:var(--surf2);border-bottom:1px solid var(--border);white-space:nowrap;}
+thead th.lft{text-align:left;padding-left:14px;}
+tbody td{padding:5px 9px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;border-bottom:1px solid #f1f5f9;white-space:nowrap;}
+tbody td.lft{text-align:left;padding-left:14px;color:var(--txt2);font-family:'DM Sans',sans-serif;font-size:11px;}
+tbody td.dow{text-align:left;font-size:9px;color:var(--txt3);padding-left:2px;min-width:34px;}
+tbody tr:hover{background:#f8fafc;}
+tbody tr.tr-today{background:#eff6ff;}
+tbody tr.tr-today td.lft{color:var(--blue);font-weight:600;}
+tbody tr.tr-tot{background:var(--surf2);border-top:2px solid var(--border);}
+tbody tr.tr-tot td{font-weight:700;}
+tbody tr.tr-tot td.lft{color:var(--txt);font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.05em;}
+.v-s{color:var(--green);font-weight:600;} .v-bn{color:var(--amber);font-weight:600;}
+.v-nb{color:var(--red);font-weight:600;}  .v-t{color:var(--blue);font-weight:700;}
+.v-hi{color:var(--slate);}               .v-0{color:var(--border2);}
+
+/* ── TRUCK PLAN ── */
+.truck-outer{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--truck);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:28px;}
+.truck-hdr{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.truck-hdr-title{font-size:14px;font-weight:700;color:var(--truck);}
+.truck-hdr-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--txt3);}
+.truck-status-legend{padding:7px 18px;border-bottom:1px solid var(--border);background:var(--surf2);display:flex;gap:14px;flex-wrap:wrap;}
+.tsl{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt3);}
+.truck-scroll{overflow-x:auto;}
+.truck-grid{display:flex;min-width:max-content;}
+.truck-col{width:175px;flex-shrink:0;border-right:1px solid var(--border);}
+.truck-col:last-child{border-right:none;}
+.truck-col-hdr{padding:9px 12px;border-bottom:1px solid var(--border);text-align:center;}
+.tc-built   .truck-col-hdr{background:#f0fdf4;}
+.tc-partial .truck-col-hdr{background:#fffbeb;}
+.tc-pending .truck-col-hdr{background:var(--surf2);}
+.truck-num{font-size:13px;font-weight:700;}
+.tc-built   .truck-num{color:var(--green);}
+.tc-partial .truck-num{color:var(--amber);}
+.tc-pending .truck-num{color:var(--truck);}
+.truck-range{font-family:'DM Mono',monospace;font-size:9px;color:var(--txt3);margin-top:2px;}
+.truck-rows{padding:9px 10px;display:flex;flex-direction:column;gap:7px;}
+
+/* rack group blocks — NO red/yellow for LH/RH */
+.rgb{border-radius:6px;padding:7px 9px;border:1px solid;}
+.rgb.cc  {background:var(--cv-bg);border-color:var(--cv-bd);}
+.rgb.lhd {background:var(--cs-bg);border-color:var(--cs-bd);}   /* sky blue */
+.rgb.rhd {background:var(--ci-bg);border-color:var(--ci-bd);}   /* indigo */
+.rgb-lbl{font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+.rgb-lbl.cc {color:var(--cv-tx);}
+.rgb-lbl.lhd{color:var(--cs-tx);}
+.rgb-lbl.rhd{color:var(--ci-tx);}
+.rgb-line{display:flex;justify-content:space-between;align-items:center;margin:2px 0;}
+.rgb-k{font-size:7px;color:var(--txt3);font-weight:500;letter-spacing:.06em;text-transform:uppercase;}
+.rgb-v{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;}
+.rgb-v.cc {color:var(--cv-tx);} .rgb-v.lhd{color:var(--cs-tx);} .rgb-v.rhd{color:var(--ci-tx);}
+.rgb-v.blend{color:var(--txt2);font-size:9px;}
+
+.sbadge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:7px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid;}
+.sb-built  {background:var(--cg-bg);border-color:var(--cg-bd);color:var(--cg-tx);}
+.sb-partial{background:var(--ca-bg);border-color:var(--ca-bd);color:var(--ca-tx);}
+.sb-pending{background:var(--cr-bg);border-color:var(--cr-bd);color:var(--cr-tx);}
+
+.truck-foot{padding:9px 18px;border-top:1px solid var(--border);background:var(--surf2);display:flex;gap:16px;flex-wrap:wrap;}
+.tf{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--txt3);}
+.tf-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+.placeholder{background:var(--surface);border:1.5px dashed var(--border2);border-radius:10px;padding:28px;text-align:center;color:var(--txt3);font-size:12px;}
+
+/* ── BUFFER TAB ── */
+.buf-note{padding:12px 20px;background:var(--cb-bg);border:1px solid var(--cb-bd);border-radius:8px;font-size:12px;color:var(--cb-tx);margin-bottom:18px;display:flex;align-items:flex-start;gap:8px;line-height:1.6;}
+.buf-note b{font-weight:700;}
+/* 2 cards per row, full width — no horizontal scroll */
+.buf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px;}
+.buf-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.buf-card-hdr{padding:11px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;border-left:3px solid var(--blue);}
+.buf-card-hdr.grp-dtp {border-left-color:var(--dtp);}
+.buf-card-hdr.grp-kcap{border-left-color:var(--kcap);}
+.buf-card-hdr.grp-u6xx{border-left-color:var(--u6xx);}
+.buf-card-hdr.grp-p703{border-left-color:var(--p703);}
+.buf-card-name{font-size:14px;font-weight:700;}
+.buf-card-tag{font-size:10px;font-family:'DM Mono',monospace;color:var(--txt3);padding:2px 8px;background:var(--surf2);border:1px solid var(--border);border-radius:4px;}
+/* No overflow-x — table fills card naturally */
+.buf-table-wrap{overflow-x:visible;}
+.buf-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;}
+.buf-table thead th{
+  padding:8px 12px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--txt3);background:var(--surf2);
+  border-bottom:1px solid var(--border);white-space:nowrap;
+}
+.buf-table thead th.c-date  {width:14%;}
+.buf-table thead th.c-day   {width:7%;}
+.buf-table thead th.c-time  {width:12%;}
+.buf-table thead th.c-our   {width:18%;}
+.buf-table thead th.c-cust  {width:22%;}
+.buf-table thead th.c-buf   {width:16%;}
+.buf-table thead th.c-calc  {width:11%;}
+.buf-table tbody td{padding:9px 12px;text-align:left;border-bottom:1px solid #f1f5f9;font-family:'DM Mono',monospace;font-size:12px;vertical-align:middle;}
+.buf-table tbody tr:last-child td{border-bottom:none;}
+.buf-table tbody tr:hover{background:#f8fafc;}
+.buf-table td.t-date{color:var(--txt2);font-family:'DM Sans',sans-serif;font-size:12px;}
+.buf-table td.t-day {color:var(--txt3);font-size:10px;letter-spacing:.05em;}
+.buf-table td.t-time{color:var(--slate);font-size:11px;}
+.buf-table td.t-our {color:var(--blue);font-weight:700;font-size:13px;line-height:1.4;}
+.buf-rack{display:block;color:var(--violet);font-size:10px;font-weight:400;margin-top:1px;}
+.buf-table td.t-cust input{
+  width:100%;border:1px solid var(--border2);border-radius:6px;
+  padding:5px 8px;font-family:'DM Mono',monospace;font-size:12px;
+  color:var(--txt);background:var(--surf2);outline:none;text-align:left;
+  transition:border-color .15s,background .15s;
+}
+.buf-table td.t-cust input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 2px rgba(37,99,235,.08);}
+.buf-table td.t-buf{font-weight:700;font-size:14px;}
+.buf-table td.t-how{font-size:10px;color:var(--txt3);line-height:1.4;}
+.buf-pos{color:var(--green);}
+.buf-neg{color:var(--red);}
+.buf-zero{color:var(--txt3);}
+.buf-na{color:var(--txt3);font-size:11px;font-weight:400;}
+.buf-refresh-btn{display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--txt2);transition:all .15s;}
+.buf-refresh-btn:hover{border-color:var(--blue);color:var(--blue);}
+.buf-top-bar{padding:0 28px 14px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.buf-top-info{font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);line-height:1.7;}
+.buf-top-info span{color:var(--txt2);}
+.buf-section-lbl{font-family:'DM Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.buf-section-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.buf-section{margin-bottom:26px;}
+.buf-calc-note{padding:10px 18px;background:var(--surf2);border-top:1px solid var(--border);font-size:11px;color:var(--txt3);line-height:1.6;}
+.buf-calc-note b{color:var(--txt2);}
+@media(max-width:900px){.buf-grid{grid-template-columns:1fr;}}
+
+/* ── LOADING ── */
+.load-ov{position:fixed;inset:0;background:rgba(244,246,249,.92);display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:999;}
+.spin{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spin-l{font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3);}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+@media(max-width:900px){
+  .cg2,.cg3{grid-template-columns:1fr;}
+  .page,.upload-row,.filter-row,.chips-row,.legend-row{padding-left:14px;padding-right:14px;}
+  .topbar,.page-tabs{padding-left:14px;padding-right:14px;}
+}
+</style>
+</head>
+<body>
+
+<div class="load-ov" id="loadOv"><div class="spin"></div><div class="spin-l">Processing…</div></div>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">866</div>
+    <div>
+      <div class="tb-title">Ford 866 Production Dashboard</div>
+      <div class="tb-sub">P702 DTP &amp; KCAP · P703 CC &amp; TFP · U6XX Production Lines</div>
+    </div>
+  </div>
+  <div class="tb-r">
+    <div class="tb-meta" id="metaP702">P702: <span id="mP702">no files</span></div>
+    <div class="tb-meta" id="metaP703">P703: <span id="mP703">no files</span></div>
+    <div class="tb-meta" id="metaU6XX">U6XX: <span id="mU6XX">no file</span></div>
+    <div id="clock">--:--:--</div>
+  </div>
+</header>
+
+<!-- TAB SWITCHER -->
+<div class="page-tabs">
+  <div class="ptab active" id="tab-p702" onclick="switchPage('p702')">P702 — DTP &amp; KCAP</div>
+  <div class="ptab" id="tab-p703" onclick="switchPage('p703')">P703 — CC &amp; TFP</div>
+  <div class="ptab" id="tab-u6xx" onclick="switchPage('u6xx')">U6XX — Production</div>
+  <div class="ptab" id="tab-buf"  onclick="switchPage('buf')">📊 Buffer Analysis</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     P702 PAGE
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="page active" id="page-p702">
+
+  <div class="upload-row">
+    <div class="file-slot" id="p7-slot1">
+      <input type="file" id="p7-f1" accept=".csv">
+      <div class="slot-top"><div class="slot-icon">📄</div><div><div class="slot-name">File 1 — IP / Gas</div><div class="slot-desc">DMS11 · P702IP</div></div></div>
+      <div class="slot-rows">
+        <div class="sr" id="p7-sr1f"><div class="dot" id="p7-d1f"></div><span id="p7-l1f">No file loaded</span></div>
+        <div class="sr" id="p7-sr1r"><div class="dot" id="p7-d1r"></div><span id="p7-l1r">Rows: —</span></div>
+        <div class="sr" id="p7-sr1g"><div class="dot" id="p7-d1g"></div><span id="p7-l1g">Groups: —</span></div>
+      </div>
+    </div>
+    <div class="file-slot" id="p7-slot2">
+      <input type="file" id="p7-f2" accept=".csv">
+      <div class="slot-top"><div class="slot-icon">📄</div><div><div class="slot-name">File 2 — Console / CC</div><div class="slot-desc">DMS10 · DTP-CC/LHD/RHD &amp; KCAP-CC/LHK/RHK</div></div></div>
+      <div class="slot-rows">
+        <div class="sr" id="p7-sr2f"><div class="dot" id="p7-d2f"></div><span id="p7-l2f">No file loaded</span></div>
+        <div class="sr" id="p7-sr2r"><div class="dot" id="p7-d2r"></div><span id="p7-l2r">Rows: —</span></div>
+        <div class="sr" id="p7-sr2g"><div class="dot" id="p7-d2g"></div><span id="p7-l2g">Groups: —</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-row" id="p7-filter">
+    <span class="fl">Filter Ship Date:</span>
+    <input type="date" id="p7-dFrom"><span class="fl">to</span><input type="date" id="p7-dTo">
+    <button class="btn btn-p" onclick="p7ApplyFilter()">Apply</button>
+    <button class="btn btn-g" onclick="p7ClearFilter()">Clear</button>
+  </div>
+  <div class="chips-row">
+    <div class="chip cg" id="p7-ch-s"><span>Built &amp; Shipped</span><span class="chip-n" id="p7-chv-s">0</span></div>
+    <div class="chip ca" id="p7-ch-b"><span>Built, Not Shipped</span><span class="chip-n" id="p7-chv-b">0</span></div>
+    <div class="chip cr" id="p7-ch-n"><span>Not Built</span><span class="chip-n" id="p7-chv-n">0</span></div>
+    <div class="chip cb" id="p7-ch-t"><span>Total Blends</span><span class="chip-n" id="p7-chv-t">0</span></div>
+  </div>
+  <div class="legend-row" id="p7-legend">
+    <div class="li"><div class="ld" style="background:var(--green)"></div>Built &amp; Shipped</div>
+    <div class="li"><div class="ld" style="background:var(--amber)"></div>Built, Not Shipped</div>
+    <div class="li"><div class="ld" style="background:var(--red)"></div>Not Built</div>
+    <div class="li"><div class="ld" style="background:var(--blue)"></div>Total</div>
+  </div>
+
+  <div id="p7-content" style="padding-top:18px">
+    <div class="placeholder" style="padding:40px">
+      <div style="font-size:28px;margin-bottom:10px">📋</div>
+      <div style="font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:5px">Upload P702 CSV Files</div>
+      <div>File 1 = IP/Gas (DMS11) &nbsp;·&nbsp; File 2 = Console/CC (DMS10)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     P703 PAGE
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-p703">
+  <div class="upload-row">
+    <div class="file-slot" id="p3-slot1">
+      <input type="file" id="p3-f1" accept=".csv">
+      <div class="slot-top"><div class="slot-icon">📄</div><div><div class="slot-name">File 1 — P703 CC</div><div class="slot-desc">Center Console · 15 pcs/rack · AP02A</div></div></div>
+      <div class="slot-rows">
+        <div class="sr" id="p3-sr1f"><div class="dot" id="p3-d1f"></div><span id="p3-l1f">No file loaded</span></div>
+        <div class="sr" id="p3-sr1r"><div class="dot" id="p3-d1r"></div><span id="p3-l1r">Rows: —</span></div>
+        <div class="sr" id="p3-sr1g"><div class="dot" id="p3-d1g"></div><span id="p3-l1g">Dates: —</span></div>
+      </div>
+    </div>
+    <div class="file-slot" id="p3-slot2">
+      <input type="file" id="p3-f2" accept=".csv">
+      <div class="slot-top"><div class="slot-icon">📄</div><div><div class="slot-name">File 2 — P703 TFP</div><div class="slot-desc">Top Finish Panel · 36 pcs/rack · AP02A</div></div></div>
+      <div class="slot-rows">
+        <div class="sr" id="p3-sr2f"><div class="dot" id="p3-d2f"></div><span id="p3-l2f">No file loaded</span></div>
+        <div class="sr" id="p3-sr2r"><div class="dot" id="p3-d2r"></div><span id="p3-l2r">Rows: —</span></div>
+        <div class="sr" id="p3-sr2g"><div class="dot" id="p3-d2g"></div><span id="p3-l2g">Dates: —</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="filter-row" id="p3-filter">
+    <span class="fl">Filter Ship Date:</span>
+    <input type="date" id="p3-dFrom"><span class="fl">to</span><input type="date" id="p3-dTo">
+    <button class="btn btn-p" onclick="p3ApplyFilter()">Apply</button>
+    <button class="btn btn-g" onclick="p3ClearFilter()">Clear</button>
+  </div>
+  <div class="chips-row">
+    <div class="chip cg" id="p3-ch-s"><span>Built &amp; Shipped</span><span class="chip-n" id="p3-chv-s">0</span></div>
+    <div class="chip ca" id="p3-ch-b"><span>Built, Not Shipped</span><span class="chip-n" id="p3-chv-b">0</span></div>
+    <div class="chip cr" id="p3-ch-n"><span>Not Built</span><span class="chip-n" id="p3-chv-n">0</span></div>
+    <div class="chip cb" id="p3-ch-t"><span>Total</span><span class="chip-n" id="p3-chv-t">0</span></div>
+  </div>
+  <div class="legend-row" id="p3-legend">
+    <div class="li"><div class="ld" style="background:var(--green)"></div>Built &amp; Shipped</div>
+    <div class="li"><div class="ld" style="background:var(--amber)"></div>Built, Not Shipped</div>
+    <div class="li"><div class="ld" style="background:var(--red)"></div>Not Built, Not Shipped</div>
+    <div class="li"><div class="ld" style="background:var(--blue)"></div>Total</div>
+  </div>
+  <div id="p3-content" style="padding-top:18px">
+    <div class="placeholder" style="padding:40px">
+      <div style="font-size:28px;margin-bottom:10px">📋</div>
+      <div style="font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:5px">Upload P703 CSV Files</div>
+      <div>File 1 = CC (Center Console) &nbsp;·&nbsp; File 2 = TFP (Top Finish Panel)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     U6XX PAGE
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-u6xx">
+
+  <div class="upload-row">
+    <div class="file-slot" id="u6-slot" style="max-width:520px">
+      <input type="file" id="u6-f1" accept=".csv">
+      <div class="slot-top"><div class="slot-icon">📄</div><div><div class="slot-name">U6XX Blends CSV</div><div class="slot-desc">Ford 866 · U6XX, U611-LHTOP, U611-RHTOP</div></div></div>
+      <div class="slot-rows">
+        <div class="sr" id="u6-srf"><div class="dot" id="u6-df"></div><span id="u6-lf">No file loaded</span></div>
+        <div class="sr" id="u6-srr"><div class="dot" id="u6-dr"></div><span id="u6-lr">Rows: —</span></div>
+        <div class="sr" id="u6-srg"><div class="dot" id="u6-dg"></div><span id="u6-lg">Groups: —</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-row" id="u6-filter">
+    <span class="fl">Filter Ship Date:</span>
+    <input type="date" id="u6-dFrom"><span class="fl">to</span><input type="date" id="u6-dTo">
+    <button class="btn btn-p" onclick="u6ApplyFilter()">Apply</button>
+    <button class="btn btn-g" onclick="u6ClearFilter()">Clear</button>
+  </div>
+  <div class="chips-row">
+    <div class="chip cg" id="u6-ch-s"><span>Built &amp; Shipped</span><span class="chip-n" id="u6-chv-s">0</span></div>
+    <div class="chip ca" id="u6-ch-b"><span>Built, Not Shipped</span><span class="chip-n" id="u6-chv-b">0</span></div>
+    <div class="chip cr" id="u6-ch-n"><span>Not Built</span><span class="chip-n" id="u6-chv-n">0</span></div>
+    <div class="chip cb" id="u6-ch-t"><span>Total Blends</span><span class="chip-n" id="u6-chv-t">0</span></div>
+  </div>
+  <div class="legend-row" id="u6-legend">
+    <div class="li"><div class="ld" style="background:var(--green)"></div>Built &amp; Shipped</div>
+    <div class="li"><div class="ld" style="background:var(--amber)"></div>Built, Not Shipped</div>
+    <div class="li"><div class="ld" style="background:var(--red)"></div>Not Built</div>
+    <div class="li"><div class="ld" style="background:var(--blue)"></div>Total</div>
+  </div>
+
+  <div id="u6-content" style="padding-top:18px">
+    <div class="placeholder" style="padding:40px">
+      <div style="font-size:28px;margin-bottom:10px">📋</div>
+      <div style="font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:5px">Upload U6XX Blends CSV</div>
+      <div>ShipTo · BlendNumber · RackGroup · ShipDate · ShipStatus · PartScanStatus</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     BUFFER PAGE
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-buf">
+  <div class="buf-top-bar" style="padding-top:18px">
+    <div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:3px">6 AM Shift-Start Buffer Analysis</div>
+      <div class="buf-top-info">Last <span>3 production days</span> · First blend at or near <span>6:00 AM</span> per line · Upload files on other tabs first</div>
+    </div>
+    <button class="buf-refresh-btn" onclick="bufRender()">⟳ Refresh</button>
+  </div>
+  <div style="padding:0 28px 6px">
+    <div class="buf-note">
+      <span>ℹ</span>
+      <div>
+        <b>How the buffer is calculated:</b> Blend numbers are Ford vehicle sequence numbers shared across all lines. For each production line, we find the first part scanned closest to 6:00 AM (within a 4–8 AM window). You enter the customer's blend number at their 6:00 AM. <b>Buffer = Our Blend − Customer Blend</b> on that same line. Since all lines use the same vehicle sequence, a positive number means you are that many vehicles ahead of the customer. Negative means the customer is ahead of you — you need to produce more to catch up.
+      </div>
+    </div>
+  </div>
+  <div id="buf-content" style="padding:0 28px 40px">
+    <div class="placeholder" style="padding:40px">
+      <div style="font-size:28px;margin-bottom:10px">📊</div>
+      <div style="font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:5px">Upload files on the P702 and U6XX tabs first</div>
+      <div>Buffer analysis uses ActualScanDate timestamps from all uploaded CSVs</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// SHARED CONSTANTS & UTILS
+// ═══════════════════════════════════════════════════════════════════════════
+const DAYS_S=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+const CC_PER_TRUCK=20, NUM_TRUCKS=8;
+
+const DTP_SECS=[
+  {label:'DTP IP',     rg:'P702IP',     file:1, accent:'ip'},
+  {label:'DTP CC',     rg:'P702CC-DTP', file:2, accent:'cc'},
+  {label:'DTP LH Val', rg:'702-LHDVAL', file:2, accent:'lh'},
+  {label:'DTP RH Val', rg:'702-RHDVAL', file:2, accent:'rh'},
+];
+const KCAP_SECS=[
+  {label:'KCAP CC',     rg:'P702CC-KCP', file:2, accent:'cc'},
+  {label:'KCAP LH Val', rg:'702-LHKVAL', file:2, accent:'lh'},
+  {label:'KCAP RH Val', rg:'702-RHKVAL', file:2, accent:'rh'},
+];
+const DTP_TRUCK ={cc:'P702CC-DTP', lhd:'702-LHDVAL',  rhd:'702-RHDVAL'};
+const KCP_TRUCK ={cc:'P702CC-KCP', lhd:'702-LHKVAL',  rhd:'702-RHKVAL'};
+const U6XX_GROUPS=['U6XX','U611-LHTOP','U611-RHTOP'];
+
+// State
+let p7rows1=[], p7rows2=[], p7fFrom=null, p7fTo=null;
+let p3ccRows=[], p3tfpRows=[], p3fFrom=null, p3fTo=null;
+let u6rows=[], u6fFrom=null, u6fTo=null;
+// Buffer: customer blend inputs keyed by "rg|dateStr"
+let bufCustInputs={};
+
+function pad(n){return String(n).padStart(2,'0');}
+function tick(){const n=new Date();document.getElementById('clock').textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;}
+setInterval(tick,1000);tick();
+
+function switchPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  if(id==='buf') bufRender();
+}
+
+// ── CSV ──
+function parseCSV(text){
+  const lines=text.split(/\r?\n/);
+  const hi=lines.findIndex(l=>l.includes('ShipTo')&&l.includes('BlendNumber'));
+  if(hi===-1)return[];
+  const headers=lines[hi].split(',').map(h=>h.trim().replace(/^\uFEFF/,''));
+  const rows=[];
+  for(let i=hi+1;i<lines.length;i++){
+    const ln=lines[i].trim();if(!ln)continue;
+    const vals=csvSplit(ln);if(vals.length<headers.length)continue;
+    const obj={};headers.forEach((h,k)=>obj[h]=(vals[k]||'').trim());
+    if(obj.ShipTo&&obj.BlendNumber)rows.push(obj);
+  }
+  return rows;
+}
+function csvSplit(line){
+  const r=[];let cur='',inQ=false;
+  for(const c of line){if(c==='"')inQ=!inQ;else if(c===','&&!inQ){r.push(cur);cur='';}else cur+=c;}
+  r.push(cur);return r;
+}
+function parseDate(s){if(!s)return null;const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);return m?new Date(+m[3],+m[1]-1,+m[2]):null;}
+function fmtDate(d){return d?`${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`:''}
+function fmtISO(d){return d?`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`:''}
+function bool(v){return v==='True'||v==='TRUE'||v==='true'||v==='1'||v===true;}
+const todayStr=fmtDate(new Date());
+
+function setSlot(idPfx,ok,lbl){
+  const[key,suffix]=idPfx.split('|');
+  document.getElementById(key+'d'+suffix).className='dot'+(ok?' ok':'');
+  document.getElementById(key+'l'+suffix).textContent=lbl;
+  document.getElementById(key+'sr'+suffix).className='sr'+(ok?' on':'');
+}
+function cv(n,cls){return n?`<td class="${cls}">${n}</td>`:`<td class="v-0">—</td>`;}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// P702 COMPUTE
+// ═══════════════════════════════════════════════════════════════════════════
+function p7computeRG(rows,rg){
+  const rr=rows.filter(r=>r.RackGroup===rg);
+  const byShip={};const dAll=new Set();
+  rr.forEach(r=>{
+    const s=bool(r.ShipStatus),sc=bool(r.PartScanStatus);
+    const d=parseDate(r.ShipDate);const b=+r.BlendNumber||0;
+    if(d){const ds=fmtDate(d);dAll.add(ds);if(!byShip[ds])byShip[ds]={s:0,bn:0,nb:0,tot:0,blends:[]};
+      const bk=byShip[ds];bk.tot++;bk.blends.push(b);
+      if(s&&sc)bk.s++;else if(!s&&sc)bk.bn++;else bk.nb++;}
+  });
+  const shipDates=[...dAll].sort((a,b)=>parseDate(a)-parseDate(b));
+  const sR=rr.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus));
+  const bR=rr.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus));
+  return{byShip,shipDates,total:rr.length,
+    lsRack:sR.length?Math.max(...sR.map(r=>+r.RackID||0)):null,
+    lsBlend:sR.length?Math.max(...sR.map(r=>+r.BlendNumber||0)):null,
+    lcRack:bR.length?Math.max(...bR.map(r=>+r.RackID||0)):null,
+    lcBlend:bR.length?Math.max(...bR.map(r=>+r.BlendNumber||0)):null,
+  };
+}
+
+function p7makeCard(sec,rows){
+  const d=p7computeRG(rows,sec.rg);
+  const ac=sec.accent;
+  const sb=`<div class="stat-bar">
+    <div class="stat-item"><div class="stat-lbl">Last Shipped Rack</div><div class="stat-val sv-g">${d.lsRack??'—'}</div></div>
+    <div class="stat-item"><div class="stat-lbl">Last Shipped Blend</div><div class="stat-val sv-b">${d.lsBlend??'—'}</div></div>
+    <div class="stat-item"><div class="stat-lbl">Last Completed Rack</div><div class="stat-val sv-a">${d.lcRack??'—'}</div></div>
+    <div class="stat-item"><div class="stat-lbl">Last Completed Blend</div><div class="stat-val sv-s">${d.lcBlend??'—'}</div></div>
+  </div>`;
+  let tbody='';
+  if(!d.shipDates.length){tbody=`<tr><td class="lft" colspan="7" style="padding:14px;color:var(--txt3)">No data</td></tr>`;}
+  else{
+    let tS=0,tBN=0,tNB=0,tT=0,mx=0;
+    d.shipDates.forEach(ds=>{
+      const b=d.byShip[ds],dt=parseDate(ds),dow=dt?DAYS_S[dt.getDay()]:'';
+      const m=b.blends.length?Math.max(...b.blends):0;
+      if(m>mx)mx=m;tS+=b.s;tBN+=b.bn;tNB+=b.nb;tT+=b.tot;
+      const iT=ds===todayStr;
+      tbody+=`<tr class="${iT?'tr-today':''}"><td class="lft">${ds}${iT?' ◀':''}</td><td class="dow">${dow}</td>${cv(b.s,'v-s')}${cv(b.bn,'v-bn')}${cv(b.nb,'v-nb')}<td class="v-t">${b.tot}</td><td class="v-hi">${m||'—'}</td></tr>`;
+    });
+    tbody+=`<tr class="tr-tot"><td class="lft">TOTAL</td><td></td><td class="v-s">${tS}</td><td class="v-bn">${tBN}</td><td class="v-nb">${tNB}</td><td class="v-t">${tT}</td><td class="v-hi">${mx||'—'}</td></tr>`;
+  }
+  return`<div class="scard"><div class="scard-hdr ${ac}"><div class="scard-name">${sec.label}</div><div class="scard-count">${d.total.toLocaleString()} blends</div></div>${sb}<div class="scard-wrap"><table><thead><tr><th class="lft">Ship Date</th><th>Day</th><th>Shipped</th><th>Blt/NSh</th><th>Not Blt</th><th>Total</th><th>Max Blend</th></tr></thead><tbody>${tbody}</tbody></table></div></div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TRUCK PLAN — FIXED: assign LHD/RHD racks by MIN blend (no overlap)
+// ═══════════════════════════════════════════════════════════════════════════
+function buildTruckPlan(rows2, cfg, title){
+  const cc =rows2.filter(r=>r.RackGroup===cfg.cc);
+  const lhd=rows2.filter(r=>r.RackGroup===cfg.lhd);
+  const rhd=rows2.filter(r=>r.RackGroup===cfg.rhd);
+  if(!cc.length)return`<div class="placeholder">Upload File 2 to generate the truck loading plan.</div>`;
+
+  // last shipped/built per group
+  const lsCC =cc.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
+  const lcCC =cc.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
+  const lsLHD=lhd.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
+  const lcLHD=lhd.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
+  const lsRHD=rhd.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
+  const lcRHD=rhd.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
+
+  // CC unshipped racks sorted
+  const ccRacks=[...new Set(cc.map(r=>+r.RackID||0))].filter(r=>r>lsCC).sort((a,b)=>a-b);
+
+  // CC blend range per rack
+  const ccByRack={};
+  cc.forEach(r=>{const rack=+r.RackID||0,b=+r.BlendNumber||0;
+    if(!ccByRack[rack])ccByRack[rack]={min:b,max:b};
+    else{ccByRack[rack].min=Math.min(ccByRack[rack].min,b);ccByRack[rack].max=Math.max(ccByRack[rack].max,b);}
+  });
+
+  // LHD/RHD: min blend per rack (for unambiguous assignment)
+  function minBlendByRack(sub){
+    const m={};
+    sub.forEach(r=>{const rack=+r.RackID||0,b=+r.BlendNumber||0;
+      if(!(rack in m)||b<m[rack])m[rack]=b;});
+    return m;
+  }
+  const lhdMinBlend=minBlendByRack(lhd);
+  const rhdMinBlend=minBlendByRack(rhd);
+
+  // Unshipped LHD/RHD racks
+  const lhdUnshipped=[...new Set(lhd.map(r=>+r.RackID||0))].filter(r=>r>lsLHD).sort((a,b)=>a-b);
+  const rhdUnshipped=[...new Set(rhd.map(r=>+r.RackID||0))].filter(r=>r>lsRHD).sort((a,b)=>a-b);
+
+  // Truck status helper
+  function tStatus(racks,lastBuilt){
+    if(!racks.length)return'pending';
+    const done=racks.filter(r=>r<=lastBuilt).length;
+    if(done===racks.length)return'built';
+    if(done>0)return'partial';
+    return'pending';
+  }
+  function sBadge(st){
+    if(st==='built')  return`<span class="sbadge sb-built">✓ Built — Ready</span>`;
+    if(st==='partial')return`<span class="sbadge sb-partial">Partial Build</span>`;
+    return                  `<span class="sbadge sb-pending">Pending</span>`;
+  }
+  function rr(racks){if(!racks.length)return'—';if(racks.length===1)return`${racks[0]}`;return`${racks[0]}–${racks[racks.length-1]}`;}
+
+  const trucks=[];
+  for(let t=0;t<NUM_TRUCKS;t++){
+    const tCC=ccRacks.slice(t*CC_PER_TRUCK,(t+1)*CC_PER_TRUCK);
+    if(!tCC.length)break;
+    const bMin=Math.min(...tCC.map(r=>ccByRack[r]?ccByRack[r].min:Infinity));
+    const bMax=Math.max(...tCC.map(r=>ccByRack[r]?ccByRack[r].max:-Infinity));
+
+    // *** FIX: assign LHD rack to this truck only if its MIN blend falls in [bMin, bMax] ***
+    const tLHD=lhdUnshipped.filter(r=>lhdMinBlend[r]>=bMin && lhdMinBlend[r]<=bMax);
+    const tRHD=rhdUnshipped.filter(r=>rhdMinBlend[r]>=bMin && rhdMinBlend[r]<=bMax);
+
+    // determine overall truck status
+    const ccSt=tStatus(tCC,lcCC), lhdSt=tStatus(tLHD,lcLHD), rhdSt=tStatus(tRHD,lcRHD);
+    const order={built:2,partial:1,pending:0};
+    const overall=[ccSt,lhdSt,rhdSt].reduce((w,s)=>order[s]<order[w]?s:w,'built');
+
+    trucks.push({num:t+1,tCC,bMin,bMax,tLHD,tRHD,ccSt,lhdSt,rhdSt,overall});
+  }
+  if(!trucks.length)return`<div class="placeholder">No pending trucks — all racks appear shipped.</div>`;
+
+  const cols=trucks.map(t=>`
+    <div class="truck-col tc-${t.overall}">
+      <div class="truck-col-hdr"><div class="truck-num">Truck ${t.num}</div><div class="truck-range">CC ${rr(t.tCC)}</div></div>
+      <div class="truck-rows">
+        <div class="rgb cc">
+          <div class="rgb-lbl cc">${cfg.cc}</div>
+          <div class="rgb-line"><span class="rgb-k">Racks</span><span class="rgb-v cc">${rr(t.tCC)} <span style="font-size:8px;color:var(--txt3)">(${t.tCC.length})</span></span></div>
+          <div class="rgb-line"><span class="rgb-k">Blend</span><span class="rgb-v blend">${t.bMin}–${t.bMax}</span></div>
+          <div class="rgb-line"><span class="rgb-k">Status</span>${sBadge(t.ccSt)}</div>
+        </div>
+        <div class="rgb lhd">
+          <div class="rgb-lbl lhd">${cfg.lhd}</div>
+          <div class="rgb-line"><span class="rgb-k">Racks</span><span class="rgb-v lhd">${rr(t.tLHD)} <span style="font-size:8px;color:var(--txt3)">(${t.tLHD.length})</span></span></div>
+          <div class="rgb-line"><span class="rgb-k">Status</span>${sBadge(t.lhdSt)}</div>
+        </div>
+        <div class="rgb rhd">
+          <div class="rgb-lbl rhd">${cfg.rhd}</div>
+          <div class="rgb-line"><span class="rgb-k">Racks</span><span class="rgb-v rhd">${rr(t.tRHD)} <span style="font-size:8px;color:var(--txt3)">(${t.tRHD.length})</span></span></div>
+          <div class="rgb-line"><span class="rgb-k">Status</span>${sBadge(t.rhdSt)}</div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  return`<div class="truck-outer">
+    <div class="truck-hdr">
+      <div><div class="truck-hdr-title">🚛 ${title} — Next ${trucks.length} Trucks</div>
+      <div class="truck-hdr-sub">Last shipped → CC ${lsCC} · LHD ${lsLHD} · RHD ${lsRHD} &nbsp;|&nbsp; Last built → CC ${lcCC} · LHD ${lcLHD} · RHD ${lcRHD} &nbsp;|&nbsp; ${CC_PER_TRUCK} CC racks/truck · LHD &amp; RHD by blend range (no overlap)</div></div>
+    </div>
+    <div class="truck-status-legend">
+      <div class="tsl"><span class="sbadge sb-built">✓ Built — Ready</span><span style="margin-left:5px">All racks in range built</span></div>
+      <div class="tsl"><span class="sbadge sb-partial">Partial Build</span><span style="margin-left:5px">Some racks built</span></div>
+      <div class="tsl"><span class="sbadge sb-pending">Pending</span><span style="margin-left:5px">No racks built yet</span></div>
+    </div>
+    <div class="truck-scroll"><div class="truck-grid">${cols}</div></div>
+    <div class="truck-foot">
+      <div class="tf"><div class="tf-dot" style="background:var(--cv-tx)"></div>${cfg.cc} · 20 racks/truck</div>
+      <div class="tf"><div class="tf-dot" style="background:var(--cs-tx)"></div>${cfg.lhd} · matched by blend</div>
+      <div class="tf"><div class="tf-dot" style="background:var(--ci-tx)"></div>${cfg.rhd} · matched by blend</div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// P702 RENDER
+// ═══════════════════════════════════════════════════════════════════════════
+function p7filterRows(rows){
+  if(!p7fFrom&&!p7fTo)return rows;
+  return rows.filter(r=>{const d=parseDate(r.ShipDate);if(!d)return true;if(p7fFrom&&d<p7fFrom)return false;if(p7fTo&&d>p7fTo)return false;return true;});
+}
+
+function p7render(){
+  const fr1=p7filterRows(p7rows1), fr2=p7filterRows(p7rows2);
+  const all=[...fr1,...fr2];
+  const content=document.getElementById('p7-content');
+  if(!all.length){content.innerHTML=`<div class="placeholder" style="padding:40px;margin-top:0">No data in selected range.</div>`;return;}
+  let gtS=0,gtBN=0,gtNB=0,gtT=0;
+  all.forEach(r=>{const s=bool(r.ShipStatus),sc=bool(r.PartScanStatus);gtT++;if(s&&sc)gtS++;else if(!s&&sc)gtBN++;else gtNB++;});
+  ['p7-ch-s','p7-ch-b','p7-ch-n','p7-ch-t'].forEach(id=>document.getElementById(id).classList.add('show'));
+  document.getElementById('p7-chv-s').textContent=gtS.toLocaleString();
+  document.getElementById('p7-chv-b').textContent=gtBN.toLocaleString();
+  document.getElementById('p7-chv-n').textContent=gtNB.toLocaleString();
+  document.getElementById('p7-chv-t').textContent=gtT.toLocaleString();
+  document.getElementById('p7-legend').style.display='flex';
+
+  function cardFor(sec){const rows=sec.file===1?fr1:fr2;if(!rows.length)return`<div class="placeholder" style="min-height:100px">Upload File ${sec.file} for ${sec.label}</div>`;return p7makeCard(sec,rows);}
+
+  const dtpCards =DTP_SECS.map(s=>`<div>${cardFor(s)}</div>`).join('');
+  const kcapCards=KCAP_SECS.map(s=>`<div>${cardFor(s)}</div>`).join('');
+  const dtpTruck =buildTruckPlan(p7rows2, DTP_TRUCK,  'DTP Console Shipping Plan');
+  const kcpTruck =buildTruckPlan(p7rows2, KCP_TRUCK,  'KCAP Console Shipping Plan');
+
+  content.innerHTML=`
+  <div class="group"><div class="group-label"><div class="group-pill gp-dtp">DTP — AP05A</div><div class="group-div"></div></div><div class="card-grid cg2">${dtpCards}</div></div>
+  <div class="group"><div class="group-label"><div class="group-pill" style="background:var(--truck)">DTP Console Shipping Plan</div><div class="group-div"></div></div>${dtpTruck}</div>
+  <div class="group"><div class="group-label"><div class="group-pill gp-kcap">KCAP — AP06A</div><div class="group-div"></div></div><div class="card-grid cg3">${kcapCards}</div></div>
+  <div class="group"><div class="group-label"><div class="group-pill" style="background:var(--kcap)">KCAP Console Shipping Plan</div><div class="group-div"></div></div>${kcpTruck}</div>`;
+}
+
+function p7updateMeta(){
+  const all=[...p7rows1,...p7rows2];
+  const dates=all.map(r=>parseDate(r.ShipDate)).filter(Boolean);
+  if(!dates.length)return;
+  const minD=new Date(Math.min(...dates)),maxD=new Date(Math.max(...dates));
+  if(!document.getElementById('p7-dFrom').value)document.getElementById('p7-dFrom').value=fmtISO(minD);
+  if(!document.getElementById('p7-dTo').value)  document.getElementById('p7-dTo').value=fmtISO(maxD);
+  document.getElementById('p7-filter').style.display='flex';
+  document.getElementById('mP702').textContent=all.length.toLocaleString()+' blends';
+}
+function p7ApplyFilter(){
+  const f=document.getElementById('p7-dFrom').value,t=document.getElementById('p7-dTo').value;
+  p7fFrom=f?new Date(f+'T00:00:00'):null;p7fTo=t?new Date(t+'T23:59:59'):null;p7render();
+}
+function p7ClearFilter(){document.getElementById('p7-dFrom').value='';document.getElementById('p7-dTo').value='';p7fFrom=p7fTo=null;p7render();}
+
+function p7loadFile(n,file){
+  document.getElementById('loadOv').style.display='flex';
+  const fr=new FileReader();
+  fr.onload=e=>{
+    try{
+      const parsed=parseCSV(e.target.result);
+      if(!parsed.length){alert('Could not parse CSV.');return;}
+      const racks=[...new Set(parsed.map(r=>r.RackGroup).filter(Boolean))];
+      const dates=parsed.map(r=>parseDate(r.ShipDate)).filter(Boolean);
+      const minD=dates.length?new Date(Math.min(...dates)):null;
+      const maxD=dates.length?new Date(Math.max(...dates)):null;
+      if(n===1)p7rows1=parsed;else p7rows2=parsed;
+      const fname=file.name.length>30?file.name.slice(0,30)+'…':file.name;
+      // update slot status
+      const pfx=n===1?'p7-':'p7-';
+      const si=n===1?'1':'2';
+      document.getElementById(`p7-d${si}f`).className='dot ok';document.getElementById(`p7-l${si}f`).textContent=fname;document.getElementById(`p7-sr${si}f`).className='sr on';
+      document.getElementById(`p7-d${si}r`).className='dot ok';document.getElementById(`p7-l${si}r`).textContent=`${parsed.length.toLocaleString()} rows · ${minD?fmtDate(minD):'?'} → ${maxD?fmtDate(maxD):'?'}`;document.getElementById(`p7-sr${si}r`).className='sr on';
+      document.getElementById(`p7-d${si}g`).className='dot ok';document.getElementById(`p7-l${si}g`).textContent=racks.join(', ');document.getElementById(`p7-sr${si}g`).className='sr on';
+      p7updateMeta();p7render();
+      // refresh buffer tab if it has data
+      if(document.getElementById('page-buf').classList.contains('active')) bufRender();
+    }catch(err){alert('Error: '+err.message);}
+    document.getElementById('loadOv').style.display='none';
+  };
+  fr.readAsText(file);
+}
+
+document.getElementById('p7-f1').addEventListener('change',e=>{if(e.target.files[0])p7loadFile(1,e.target.files[0]);});
+document.getElementById('p7-f2').addEventListener('change',e=>{if(e.target.files[0])p7loadFile(2,e.target.files[0]);});
+['p7-slot1','p7-slot2'].forEach((id,i)=>{
+  const el=document.getElementById(id),n=i+1;
+  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('over');});
+  el.addEventListener('dragleave',()=>el.classList.remove('over'));
+  el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('over');const f=e.dataTransfer.files[0];if(f&&f.name.endsWith('.csv'))p7loadFile(n,f);});
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// U6XX LOGIC
+// ═══════════════════════════════════════════════════════════════════════════
+function u6filterRows(rows){
+  if(!u6fFrom&&!u6fTo)return rows;
+  return rows.filter(r=>{const d=parseDate(r.ShipDate);if(!d)return true;if(u6fFrom&&d<u6fFrom)return false;if(u6fTo&&d>u6fTo)return false;return true;});
+}
+
+function u6computeRG(rows,rg){
+  const rr=rows.filter(r=>(r.RackGroup||'').trim()===rg);
+  const byShip={};const dAll=new Set();
+  rr.forEach(r=>{
+    const s=bool(r.ShipStatus),sc=bool(r.PartScanStatus);
+    const d=parseDate(r.ShipDate);const b=+r.BlendNumber||0;
+    if(d){const ds=fmtDate(d);dAll.add(ds);if(!byShip[ds])byShip[ds]={s:0,bn:0,nb:0,tot:0,blends:[]};
+      const bk=byShip[ds];bk.tot++;bk.blends.push(b);
+      if(s&&sc)bk.s++;else if(!s&&sc)bk.bn++;else bk.nb++;}
+  });
+  const shipDates=[...dAll].sort((a,b)=>parseDate(a)-parseDate(b));
+  const sR=rr.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus));
+  const bR=rr.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus));
+  return{byShip,shipDates,total:rr.length,
+    lsRack:sR.length?Math.max(...sR.map(r=>+r.RackID||0)):null,
+    lsBlend:sR.length?Math.max(...sR.map(r=>+r.BlendNumber||0)):null,
+    lcRack:bR.length?Math.max(...bR.map(r=>+r.RackID||0)):null,
+    lcBlend:bR.length?Math.max(...bR.map(r=>+r.BlendNumber||0)):null,
+  };
+}
+
+function u6makeCard(rg,rows){
+  const d=u6computeRG(rows,rg);
+  const sb=`<div class="stat-bar">
+    <div class="stat-item"><div class="stat-lbl">Last Shipped Rack</div><div class="stat-val sv-g">${d.lsRack??'—'}</div></div>
+    <div class="stat-item"><div class="stat-lbl">Last Shipped Blend</div><div class="stat-val sv-b">${d.lsBlend??'—'}</div></div>
+    <div class="stat-item"><div class="stat-lbl">Last Completed Rack</div><div class="stat-val sv-a">${d.lcRack??'—'}</div></div>
+    <div class="stat-item"><div class="stat-lbl">Last Completed Blend</div><div class="stat-val sv-s">${d.lcBlend??'—'}</div></div>
+  </div>`;
+  let tbody='';
+  if(!d.shipDates.length){tbody=`<tr><td class="lft" colspan="7" style="padding:14px;color:var(--txt3)">No data</td></tr>`;}
+  else{
+    let tS=0,tBN=0,tNB=0,tT=0,mx=0;
+    d.shipDates.forEach(ds=>{
+      const b=d.byShip[ds],dt=parseDate(ds),dow=dt?DAYS_S[dt.getDay()]:'';
+      const m=b.blends.length?Math.max(...b.blends):0;
+      if(m>mx)mx=m;tS+=b.s;tBN+=b.bn;tNB+=b.nb;tT+=b.tot;
+      const iT=ds===todayStr;
+      tbody+=`<tr class="${iT?'tr-today':''}"><td class="lft">${ds}${iT?' ◀':''}</td><td class="dow">${dow}</td>${cv(b.s,'v-s')}${cv(b.bn,'v-bn')}${cv(b.nb,'v-nb')}<td class="v-t">${b.tot}</td><td class="v-hi">${m||'—'}</td></tr>`;
+    });
+    tbody+=`<tr class="tr-tot"><td class="lft">TOTAL</td><td></td><td class="v-s">${tS}</td><td class="v-bn">${tBN}</td><td class="v-nb">${tNB}</td><td class="v-t">${tT}</td><td class="v-hi">${mx||'—'}</td></tr>`;
+  }
+  return`<div class="scard"><div class="scard-hdr u6"><div class="scard-name">${rg}</div><div class="scard-count">${d.total.toLocaleString()} blends</div></div>${sb}<div class="scard-wrap"><table><thead><tr><th class="lft">Ship Date</th><th>Day</th><th>Shipped</th><th>Blt/NSh</th><th>Not Blt</th><th>Total</th><th>Max Blend</th></tr></thead><tbody>${tbody}</tbody></table></div></div>`;
+}
+
+function u6render(){
+  const fr=u6filterRows(u6rows);
+  const content=document.getElementById('u6-content');
+  if(!fr.length){content.innerHTML=`<div class="placeholder" style="padding:40px;margin-top:0">No data in selected range.</div>`;return;}
+  let gtS=0,gtBN=0,gtNB=0,gtT=0;
+  fr.forEach(r=>{const s=bool(r.ShipStatus),sc=bool(r.PartScanStatus);gtT++;if(s&&sc)gtS++;else if(!s&&sc)gtBN++;else gtNB++;});
+  ['u6-ch-s','u6-ch-b','u6-ch-n','u6-ch-t'].forEach(id=>document.getElementById(id).classList.add('show'));
+  document.getElementById('u6-chv-s').textContent=gtS.toLocaleString();
+  document.getElementById('u6-chv-b').textContent=gtBN.toLocaleString();
+  document.getElementById('u6-chv-n').textContent=gtNB.toLocaleString();
+  document.getElementById('u6-chv-t').textContent=gtT.toLocaleString();
+  document.getElementById('u6-legend').style.display='flex';
+
+  const cards=U6XX_GROUPS.map(rg=>`<div>${u6makeCard(rg,fr)}</div>`).join('');
+  content.innerHTML=`<div class="group"><div class="group-label"><div class="group-pill gp-u6xx">U6XX Production — AP03A</div><div class="group-div"></div></div><div class="card-grid cg3">${cards}</div></div>`;
+}
+
+function u6loadFile(file){
+  document.getElementById('loadOv').style.display='flex';
+  const fr=new FileReader();
+  fr.onload=e=>{
+    try{
+      const parsed=parseCSV(e.target.result);
+      if(!parsed.length){alert('Could not parse CSV.');return;}
+      u6rows=parsed;
+      const racks=[...new Set(parsed.map(r=>r.RackGroup).filter(Boolean))];
+      const dates=parsed.map(r=>parseDate(r.ShipDate)).filter(Boolean);
+      const minD=dates.length?new Date(Math.min(...dates)):null;
+      const maxD=dates.length?new Date(Math.max(...dates)):null;
+      const fname=file.name.length>30?file.name.slice(0,30)+'…':file.name;
+      document.getElementById('u6-df').className='dot ok';document.getElementById('u6-lf').textContent=fname;document.getElementById('u6-srf').className='sr on';
+      document.getElementById('u6-dr').className='dot ok';document.getElementById('u6-lr').textContent=`${parsed.length.toLocaleString()} rows · ${minD?fmtDate(minD):'?'} → ${maxD?fmtDate(maxD):'?'}`;document.getElementById('u6-srr').className='sr on';
+      document.getElementById('u6-dg').className='dot ok';document.getElementById('u6-lg').textContent=racks.join(', ');document.getElementById('u6-srg').className='sr on';
+      const allDates=parsed.map(r=>parseDate(r.ShipDate)).filter(Boolean);
+      if(allDates.length){
+        const mn=new Date(Math.min(...allDates)),mx=new Date(Math.max(...allDates));
+        if(!document.getElementById('u6-dFrom').value)document.getElementById('u6-dFrom').value=fmtISO(mn);
+        if(!document.getElementById('u6-dTo').value)  document.getElementById('u6-dTo').value=fmtISO(mx);
+      }
+      document.getElementById('u6-filter').style.display='flex';
+      document.getElementById('mU6XX').textContent=parsed.length.toLocaleString()+' blends';
+      u6render();
+      if(document.getElementById('page-buf').classList.contains('active')) bufRender();
+    }catch(err){alert('Error: '+err.message);}
+    document.getElementById('loadOv').style.display='none';
+  };
+  fr.readAsText(file);
+}
+
+document.getElementById('u6-f1').addEventListener('change',e=>{if(e.target.files[0])u6loadFile(e.target.files[0]);});
+const u6slot=document.getElementById('u6-slot');
+u6slot.addEventListener('dragover',e=>{e.preventDefault();u6slot.classList.add('over');});
+u6slot.addEventListener('dragleave',()=>u6slot.classList.remove('over'));
+u6slot.addEventListener('drop',e=>{e.preventDefault();u6slot.classList.remove('over');const f=e.dataTransfer.files[0];if(f&&f.name.endsWith('.csv'))u6loadFile(f);});
+
+function u6ApplyFilter(){
+  const f=document.getElementById('u6-dFrom').value,t=document.getElementById('u6-dTo').value;
+  u6fFrom=f?new Date(f+'T00:00:00'):null;u6fTo=t?new Date(t+'T23:59:59'):null;u6render();
+}
+function u6ClearFilter(){document.getElementById('u6-dFrom').value='';document.getElementById('u6-dTo').value='';u6fFrom=u6fTo=null;u6render();}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// P703 LOGIC
+// P703 CSV has different columns: Build Status, Blend No, Rack ID,
+// Customer Ship Date (YYYY-MM-DD HH:MM:SS), Actual Scan Date
+// Two sub-lines: CC (15 pcs/rack) and TFP (36 pcs/rack)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Parse P703 CSV (different format — no skiprows, direct headers)
+function parseP703CSV(text, lineKey) {
+  const lines = text.split(/\r?\n/);
+  // Find header row
+  const hi = lines.findIndex(l => l.includes('Build Status') && l.includes('Blend No'));
+  if (hi === -1) return [];
+  // Use proper CSV split (handles quoted fields), then strip surrounding quotes from headers
+  const headers = csvSplit(lines[hi]).map(h => h.trim().replace(/^"|"$/g, '').replace(/^\uFEFF/, ''));
+  const rows = [];
+  for (let i = hi+1; i < lines.length; i++) {
+    const ln = lines[i].trim(); if (!ln) continue;
+    const vals = csvSplit(ln);
+    if (vals.length < 5) continue;
+    const obj = {};
+    // Strip surrounding quotes from every value
+    headers.forEach((h, k) => obj[h] = (vals[k] || '').trim().replace(/^"|"$/g, ''));
+    if (!obj['Blend No']) continue;
+    // Normalize to shared field names used by buffer analysis
+    obj.BlendNumber    = obj['Blend No'];
+    obj.RackID         = obj['Rack ID'];
+    obj.RackGroup      = lineKey;  // 'P703CC' or 'P703TFP'
+    obj.ShipStatus     = obj['Ship Status'] === 'Shipped' ? 'True' : 'False';
+    obj.PartScanStatus = (obj['Scan Status'] === 'Scanned to container') ? 'True' : 'False';
+    // Ship date: "2026-05-13 06:00:00" → "5/13/2026"
+    const sdm = (obj['Customer Ship Date'] || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    obj.ShipDate = sdm ? `${+sdm[2]}/${+sdm[3]}/${sdm[1]}` : '';
+    // ActualScanDate: keep raw (buffer analysis handles "Not Yet Loaded")
+    obj.ActualScanDate = obj['Actual Scan Date'] || '';
+    // Build status — used by P703 render logic
+    obj.BuildStatus = obj['Build Status'] || '';
+    rows.push(obj);
+  }
+  return rows;
+}
+
+// Parse P703 date string "YYYY-MM-DD HH:MM:SS" → date portion "M/D/YYYY"
+function p3parseShipDate(s) {
+  if (!s) return null;
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? new Date(+m[1], +m[2]-1, +m[3]) : null;
+}
+
+// Parse P703 Actual Scan Date "2026-05-12 10:14:03" → Date object
+function p3parseScanDT(s) {
+  if (!s || s === 'Not Yet Loaded' || s === 'Not Yet Shipped') return null;
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+  return m ? new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]) : null;
+}
+
+function p3filterRows(rows) {
+  if (!p3fFrom && !p3fTo) return rows;
+  return rows.filter(r => {
+    const d = p3parseShipDate(r['Customer Ship Date']); if (!d) return true;
+    if (p3fFrom && d < p3fFrom) return false;
+    if (p3fTo   && d > p3fTo)   return false;
+    return true;
+  });
+}
+
+function p3computeLine(rows) {
+  // Group by ship date
+  const byShip = {}; const dAll = new Set();
+  rows.forEach(r => {
+    const d = p3parseShipDate(r['Customer Ship Date']); if (!d) return;
+    const ds = fmtDate(d); dAll.add(ds);
+    if (!byShip[ds]) byShip[ds] = {s:0, bn:0, nb:0, tot:0, blends:[]};
+    const b = byShip[ds];
+    const bs = r.BuildStatus;
+    b.tot++;
+    b.blends.push(+r['Blend No'] || 0);
+    if (bs === 'Built, Shipped')        b.s++;
+    else if (bs === 'Built, Not Shipped') b.bn++;
+    else                                  b.nb++;
+  });
+  const shipDates = [...dAll].sort((a,b) => parseDate(a) - parseDate(b));
+  const sR = rows.filter(r => r.BuildStatus === 'Built, Shipped');
+  const bR = rows.filter(r => r.BuildStatus === 'Built, Not Shipped');
+  return {
+    byShip, shipDates, total: rows.length,
+    lsRack:  sR.length ? Math.max(...sR.map(r => +r['Rack ID']||0)) : null,
+    lsBlend: sR.length ? Math.max(...sR.map(r => +r['Blend No']||0)) : null,
+    lcRack:  bR.length ? Math.max(...bR.map(r => +r['Rack ID']||0)) : null,
+    lcBlend: bR.length ? Math.max(...bR.map(r => +r['Blend No']||0)) : null,
+  };
+}
+
+function p3makeCard(label, accent, pcsPerRack, truckRacks, truckPcs, rows) {
+  const d = p3computeLine(rows);
+  const sb = `<div class="stat-bar">
+    <div class="stat-item"><div class="stat-lbl">Last Shipped Rack</div><div class="stat-val sv-g">${d.lsRack ?? '—'}</div></div>
+    <div class="stat-item"><div class="stat-lbl">Last Shipped Blend</div><div class="stat-val sv-b">${d.lsBlend ?? '—'}</div></div>
+    <div class="stat-item"><div class="stat-lbl">Last Completed Rack</div><div class="stat-val sv-a">${d.lcRack ?? '—'}</div></div>
+    <div class="stat-item"><div class="stat-lbl">Last Completed Blend</div><div class="stat-val sv-s">${d.lcBlend ?? '—'}</div></div>
+  </div>`;
+  let tbody = '';
+  if (!d.shipDates.length) {
+    tbody = `<tr><td class="lft" colspan="7" style="padding:14px;color:var(--txt3)">No data</td></tr>`;
+  } else {
+    let tS=0, tBN=0, tNB=0, tT=0, mx=0;
+    d.shipDates.forEach(ds => {
+      const b = d.byShip[ds], dt = parseDate(ds), dow = dt ? DAYS_S[dt.getDay()] : '';
+      const m = b.blends.length ? Math.max(...b.blends) : 0;
+      if (m > mx) mx = m; tS+=b.s; tBN+=b.bn; tNB+=b.nb; tT+=b.tot;
+      const iT = ds === todayStr;
+      tbody += `<tr class="${iT?'tr-today':''}"><td class="lft">${ds}${iT?' ◀':''}</td><td class="dow">${dow}</td>${cv(b.s,'v-s')}${cv(b.bn,'v-bn')}${cv(b.nb,'v-nb')}<td class="v-t">${b.tot}</td><td class="v-hi">${m||'—'}</td></tr>`;
+    });
+    tbody += `<tr class="tr-tot"><td class="lft">TOTAL</td><td></td><td class="v-s">${tS}</td><td class="v-bn">${tBN}</td><td class="v-nb">${tNB}</td><td class="v-t">${tT}</td><td class="v-hi">${mx||'—'}</td></tr>`;
+  }
+  return `<div class="scard">
+    <div class="scard-hdr ${accent}">
+      <div class="scard-name">${label}</div>
+      <div class="scard-count">${d.total.toLocaleString()} units &nbsp;·&nbsp; ${pcsPerRack} pcs/rack &nbsp;·&nbsp; ${truckRacks} racks/truck (${truckPcs} pcs)</div>
+    </div>
+    ${sb}
+    <div class="scard-wrap"><table>
+      <thead><tr><th class="lft">Ship Date</th><th>Day</th><th>Shipped</th><th>Blt/NSh</th><th>Not Blt</th><th>Total</th><th>Max Blend</th></tr></thead>
+      <tbody>${tbody}</tbody>
+    </table></div>
+  </div>`;
+}
+
+// ── P703 TRUCK PLAN ──────────────────────────────────────────────────────────
+// CC: 20 racks/truck (15 pcs/rack = 300 pcs/truck)
+// TFP: matched by min blend falling in CC truck blend range
+function buildP703TruckPlan(ccRows, tfpRows) {
+  if (!ccRows.length) return `<div class="placeholder">Upload both P703 files to see the shipping plan.</div>`;
+
+  const CC_PER_TRUCK = 20;
+
+  // Last shipped rack per line
+  const lsCCRack  = ccRows.filter(r=>r.BuildStatus==='Built, Shipped'&&r.RackID).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
+  const lcCCRack  = ccRows.filter(r=>r.BuildStatus==='Built, Not Shipped'&&r.RackID).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
+  const lsTFPRack = tfpRows.filter(r=>r.BuildStatus==='Built, Shipped'&&r.RackID).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
+  const lcTFPRack = tfpRows.filter(r=>r.BuildStatus==='Built, Not Shipped'&&r.RackID).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
+
+  // Blend range per CC rack
+  const ccByRack = {};
+  ccRows.forEach(r => {
+    if (!r.RackID) return;
+    const rk = +r.RackID, b = +r['Blend No']||0;
+    if (!ccByRack[rk]) ccByRack[rk] = {min:b,max:b};
+    else { ccByRack[rk].min=Math.min(ccByRack[rk].min,b); ccByRack[rk].max=Math.max(ccByRack[rk].max,b); }
+  });
+
+  // TFP: min blend per rack (for no-overlap assignment)
+  const tfpMinBlend = {};
+  const tfpByRack = {};
+  tfpRows.forEach(r => {
+    if (!r.RackID) return;
+    const rk = +r.RackID, b = +r['Blend No']||0;
+    if (!tfpByRack[rk]) tfpByRack[rk] = {min:b,max:b};
+    else { tfpByRack[rk].min=Math.min(tfpByRack[rk].min,b); tfpByRack[rk].max=Math.max(tfpByRack[rk].max,b); }
+    if (!(rk in tfpMinBlend) || b < tfpMinBlend[rk]) tfpMinBlend[rk] = b;
+  });
+
+  const ccUnshipped = [...new Set(ccRows.filter(r=>r.RackID&&+r.RackID>lsCCRack).map(r=>+r.RackID))].sort((a,b)=>a-b);
+  const tfpUnshipped = [...new Set(tfpRows.filter(r=>r.RackID&&+r.RackID>lsTFPRack).map(r=>+r.RackID))].sort((a,b)=>a-b);
+
+  if (!ccUnshipped.length) return `<div class="placeholder">No pending CC racks found — all appear shipped.</div>`;
+
+  // Build up to 3 trucks
+  const trucks = [];
+  for (let t = 0; t < 3; t++) {
+    const tCC = ccUnshipped.slice(t*CC_PER_TRUCK, (t+1)*CC_PER_TRUCK);
+    if (!tCC.length) break;
+    const bMin = Math.min(...tCC.map(r=>ccByRack[r]?ccByRack[r].min:Infinity));
+    const bMax = Math.max(...tCC.map(r=>ccByRack[r]?ccByRack[r].max:-Infinity));
+    // TFP racks assigned by min blend (no overlap)
+    const tTFP = tfpUnshipped.filter(rk => tfpMinBlend[rk] >= bMin && tfpMinBlend[rk] <= bMax);
+    // Status per group
+    function tStatus(racks, lastBuilt) {
+      if (!racks.length) return 'pending';
+      const done = racks.filter(r=>r<=lastBuilt).length;
+      if (done===racks.length) return 'built'; if (done>0) return 'partial'; return 'pending';
+    }
+    const ccSt  = tStatus(tCC,  lcCCRack);
+    const tfpSt = tStatus(tTFP, lcTFPRack);
+    const order = {built:2,partial:1,pending:0};
+    const overall = [ccSt,tfpSt].reduce((w,s)=>order[s]<order[w]?s:w,'built');
+    const tfpBMin = tTFP.length ? Math.min(...tTFP.map(rk=>tfpByRack[rk].min)) : null;
+    const tfpBMax = tTFP.length ? Math.max(...tTFP.map(rk=>tfpByRack[rk].max)) : null;
+    trucks.push({num:t+1, tCC, bMin, bMax, tTFP, tfpBMin, tfpBMax, ccSt, tfpSt, overall});
+  }
+
+  function rr(racks) { if(!racks.length)return'—'; if(racks.length===1)return`${racks[0]}`; return`${racks[0]}–${racks[racks.length-1]}`; }
+  function sBadge(st) {
+    if(st==='built')   return`<span class="sbadge sb-built">✓ Built — Ready</span>`;
+    if(st==='partial') return`<span class="sbadge sb-partial">Partial Build</span>`;
+    return                    `<span class="sbadge sb-pending">Pending</span>`;
+  }
+
+  const cols = trucks.map(t => `
+    <div class="truck-col tc-${t.overall}">
+      <div class="truck-col-hdr"><div class="truck-num">Truck ${t.num}</div><div class="truck-range">CC ${rr(t.tCC)}</div></div>
+      <div class="truck-rows">
+        <div class="rgb cc">
+          <div class="rgb-lbl cc">P703 CC (Center Console)</div>
+          <div class="rgb-line"><span class="rgb-k">Racks</span><span class="rgb-v cc">${rr(t.tCC)} <span style="font-size:8px;color:var(--txt3)">(${t.tCC.length})</span></span></div>
+          <div class="rgb-line"><span class="rgb-k">Blend</span><span class="rgb-v blend">${t.bMin}–${t.bMax}</span></div>
+          <div class="rgb-line"><span class="rgb-k">Status</span>${sBadge(t.ccSt)}</div>
+        </div>
+        <div class="rgb lhd">
+          <div class="rgb-lbl lhd">P703 TFP (Top Finish Panel)</div>
+          <div class="rgb-line"><span class="rgb-k">Racks</span><span class="rgb-v lhd">${rr(t.tTFP)} <span style="font-size:8px;color:var(--txt3)">(${t.tTFP.length})</span></span></div>
+          <div class="rgb-line"><span class="rgb-k">Blend</span><span class="rgb-v blend">${t.tfpBMin??'—'}–${t.tfpBMax??'—'}</span></div>
+          <div class="rgb-line"><span class="rgb-k">Status</span>${sBadge(t.tfpSt)}</div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  return `<div class="truck-outer" style="border-top-color:var(--p703)">
+    <div class="truck-hdr">
+      <div>
+        <div class="truck-hdr-title" style="color:var(--p703)">🚛 P703 Shipping Plan — Next ${trucks.length} Trucks</div>
+        <div class="truck-hdr-sub">Last shipped → CC Rack ${lsCCRack} · TFP Rack ${lsTFPRack} &nbsp;|&nbsp; Last built → CC Rack ${lcCCRack} · TFP Rack ${lcTFPRack} &nbsp;|&nbsp; ${CC_PER_TRUCK} CC racks/truck · TFP matched by blend range</div>
+      </div>
+    </div>
+    <div class="truck-status-legend">
+      <div class="tsl"><span class="sbadge sb-built">✓ Built — Ready</span><span style="margin-left:5px">All racks built</span></div>
+      <div class="tsl"><span class="sbadge sb-partial">Partial Build</span><span style="margin-left:5px">Some racks built</span></div>
+      <div class="tsl"><span class="sbadge sb-pending">Pending</span><span style="margin-left:5px">Not yet built</span></div>
+    </div>
+    <div class="truck-scroll"><div class="truck-grid">${cols}</div></div>
+    <div class="truck-foot">
+      <div class="tf"><div class="tf-dot" style="background:var(--cv-tx)"></div>P703 CC · 20 racks/truck · 15 pcs/rack · 300 pcs total</div>
+      <div class="tf"><div class="tf-dot" style="background:var(--cs-tx)"></div>P703 TFP · matched by blend range · 36 pcs/rack</div>
+    </div>
+  </div>`;
+}
+
+function p3render() {
+  const fr1 = p3filterRows(p3ccRows);
+  const fr2 = p3filterRows(p3tfpRows);
+  const all = [...fr1, ...fr2];
+  const content = document.getElementById('p3-content');
+  if (!all.length) { content.innerHTML = `<div class="placeholder" style="padding:40px;margin-top:0">Upload P703 CSV files to begin.</div>`; return; }
+
+  let gtS=0, gtBN=0, gtNB=0, gtT=0;
+  all.forEach(r => {
+    gtT++;
+    const bs = r.BuildStatus;
+    if (bs === 'Built, Shipped') gtS++;
+    else if (bs === 'Built, Not Shipped') gtBN++;
+    else gtNB++;
+  });
+  ['p3-ch-s','p3-ch-b','p3-ch-n','p3-ch-t'].forEach(id => document.getElementById(id).classList.add('show'));
+  document.getElementById('p3-chv-s').textContent = gtS.toLocaleString();
+  document.getElementById('p3-chv-b').textContent = gtBN.toLocaleString();
+  document.getElementById('p3-chv-n').textContent = gtNB.toLocaleString();
+  document.getElementById('p3-chv-t').textContent = gtT.toLocaleString();
+  document.getElementById('p3-legend').style.display = 'flex';
+
+  const ccCard  = fr1.length ? p3makeCard('P703 CC — Center Console',  'p3cc',  15, 20, 300, fr1) : `<div class="placeholder" style="min-height:100px">Upload File 1 (CC)</div>`;
+  const tfpCard = fr2.length ? p3makeCard('P703 TFP — Top Finish Panel','p3tfp', 36, 12, 432, fr2) : `<div class="placeholder" style="min-height:100px">Upload File 2 (TFP)</div>`;
+  // Truck plan uses FULL unfiltered rows so last-shipped rack is always correct
+  const truckPlan = buildP703TruckPlan(p3ccRows, p3tfpRows);
+
+  content.innerHTML = `
+  <div class="group">
+    <div class="group-label"><div class="group-pill gp-p703">P703 — AP02A</div><div class="group-div"></div></div>
+    <div class="card-grid cg2">
+      <div>${ccCard}</div>
+      <div>${tfpCard}</div>
+    </div>
+  </div>
+  <div class="group">
+    <div class="group-label"><div class="group-pill" style="background:var(--p703)">P703 Shipping Plan</div><div class="group-div"></div></div>
+    ${truckPlan}
+  </div>`;
+}
+
+function p3updateMeta() {
+  const all = [...p3ccRows, ...p3tfpRows];
+  const dates = all.map(r => p3parseShipDate(r['Customer Ship Date'])).filter(Boolean);
+  if (!dates.length) return;
+  const maxD = new Date(Math.max(...dates));
+  // Default from-date = last Friday (or previous Friday if today is Friday)
+  function lastFriday() {
+    const d = new Date(); d.setHours(0,0,0,0);
+    const dow = d.getDay(); // 0=Sun,5=Fri
+    const daysBack = dow === 5 ? 7 : (dow + 2) % 7 + (dow < 5 ? 2 : 0);
+    // simpler: go back until we hit a Friday
+    const f = new Date(d);
+    let steps = 0;
+    while (f.getDay() !== 5 || steps === 0) { f.setDate(f.getDate()-1); steps++; if(steps>14)break; }
+    return f;
+  }
+  const lf = lastFriday();
+  if (!document.getElementById('p3-dFrom').value) document.getElementById('p3-dFrom').value = fmtISO(lf);
+  if (!document.getElementById('p3-dTo').value)   document.getElementById('p3-dTo').value   = fmtISO(maxD);
+  // Apply filter immediately so the view starts filtered
+  p3fFrom = new Date(fmtISO(lf)+'T00:00:00');
+  p3fTo   = new Date(fmtISO(maxD)+'T23:59:59');
+  document.getElementById('p3-filter').style.display = 'flex';
+  document.getElementById('mP703').textContent = all.length.toLocaleString() + ' units';
+}
+
+function p3loadFile(n, file) {
+  document.getElementById('loadOv').style.display = 'flex';
+  const fr = new FileReader();
+  fr.onload = e => {
+    try {
+      const lineKey = n === 1 ? 'P703CC' : 'P703TFP';
+      const parsed = parseP703CSV(e.target.result, lineKey);
+      if (!parsed.length) { alert('Could not parse P703 CSV.'); return; }
+      if (n === 1) p3ccRows = parsed; else p3tfpRows = parsed;
+      const dates = parsed.map(r => p3parseShipDate(r['Customer Ship Date'])).filter(Boolean);
+      const minD = dates.length ? new Date(Math.min(...dates)) : null;
+      const maxD = dates.length ? new Date(Math.max(...dates)) : null;
+      const fname = file.name.length > 30 ? file.name.slice(0,30)+'…' : file.name;
+      document.getElementById(`p3-d${n}f`).className='dot ok'; document.getElementById(`p3-l${n}f`).textContent=fname; document.getElementById(`p3-sr${n}f`).className='sr on';
+      document.getElementById(`p3-d${n}r`).className='dot ok'; document.getElementById(`p3-l${n}r`).textContent=`${parsed.length.toLocaleString()} rows · ${minD?fmtDate(minD):'?'} → ${maxD?fmtDate(maxD):'?'}`; document.getElementById(`p3-sr${n}r`).className='sr on';
+      const bsVals = [...new Set(parsed.map(r=>r.BuildStatus))].join(', ');
+      document.getElementById(`p3-d${n}g`).className='dot ok'; document.getElementById(`p3-l${n}g`).textContent=bsVals; document.getElementById(`p3-sr${n}g`).className='sr on';
+      p3updateMeta(); p3render();
+      if (document.getElementById('page-buf').classList.contains('active')) bufRender();
+    } catch(err) { alert('Error: '+err.message); }
+    document.getElementById('loadOv').style.display = 'none';
+  };
+  fr.readAsText(file);
+}
+
+document.getElementById('p3-f1').addEventListener('change', e => { if(e.target.files[0]) p3loadFile(1, e.target.files[0]); });
+document.getElementById('p3-f2').addEventListener('change', e => { if(e.target.files[0]) p3loadFile(2, e.target.files[0]); });
+['p3-slot1','p3-slot2'].forEach((id,i) => {
+  const el = document.getElementById(id), n = i+1;
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('over'); });
+  el.addEventListener('dragleave', () => el.classList.remove('over'));
+  el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('over'); const f=e.dataTransfer.files[0]; if(f&&f.name.endsWith('.csv')) p3loadFile(n,f); });
+});
+
+function p3ApplyFilter() {
+  const f=document.getElementById('p3-dFrom').value, t=document.getElementById('p3-dTo').value;
+  p3fFrom = f ? new Date(f+'T00:00:00') : null;
+  p3fTo   = t ? new Date(t+'T23:59:59') : null;
+  p3render();
+}
+function p3ClearFilter() {
+  document.getElementById('p3-dFrom').value=''; document.getElementById('p3-dTo').value='';
+  p3fFrom = p3fTo = null; p3render();
+}
+
+// Extend buffer's findShiftStart to handle P703 scan date format "2026-05-12 10:14:03"
+// Override parseDT to also handle ISO-ish format
+const _origParseDT = parseDT;
+function parseDT(s) {
+  if (!s || s.trim() === '' || s === 'nan' || s === 'Not Yet Loaded' || s === 'Not Yet Shipped') return null;
+  // Try original 12hr format first
+  const r1 = _origParseDT(s);
+  if (r1) return r1;
+  // Try "YYYY-MM-DD HH:MM:SS" (24hr, P703 format)
+  const m = s.trim().match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+  if (m) return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
+  return null;
+}
+
+// Also extend getLastNDates to handle P703 ActualScanDate format
+// (already handled by the overridden parseDT above)
+
+// All production lines to analyze
+const BUF_LINES = [
+  { rg:'P702IP',     label:'DTP IP',      group:'DTP — AP05A',  groupCls:'grp-dtp',  src:'p702' },
+  { rg:'P702CC-DTP', label:'DTP CC',       group:'DTP — AP05A',  groupCls:'grp-dtp',  src:'p702' },
+  { rg:'702-LHDVAL', label:'DTP LH Val',   group:'DTP — AP05A',  groupCls:'grp-dtp',  src:'p702' },
+  { rg:'702-RHDVAL', label:'DTP RH Val',   group:'DTP — AP05A',  groupCls:'grp-dtp',  src:'p702' },
+  { rg:'P702CC-KCP', label:'KCAP CC',      group:'KCAP — AP06A', groupCls:'grp-kcap', src:'p702' },
+  { rg:'702-LHKVAL', label:'KCAP LH Val',  group:'KCAP — AP06A', groupCls:'grp-kcap', src:'p702' },
+  { rg:'702-RHKVAL', label:'KCAP RH Val',  group:'KCAP — AP06A', groupCls:'grp-kcap', src:'p702' },
+  { rg:'U6XX',       label:'U6XX',         group:'U6XX — AP03A', groupCls:'grp-u6xx', src:'u6xx' },
+  { rg:'U611-LHTOP', label:'U611 LH Top',  group:'U6XX — AP03A', groupCls:'grp-u6xx', src:'u6xx' },
+  { rg:'U611-RHTOP', label:'U611 RH Top',  group:'U6XX — AP03A', groupCls:'grp-u6xx', src:'u6xx' },
+  { rg:'P703CC',     label:'P703 CC',       group:'P703 — AP02A', groupCls:'grp-p703', src:'p703cc' },
+  { rg:'P703TFP',    label:'P703 TFP',      group:'P703 — AP02A', groupCls:'grp-p703', src:'p703tfp' },
+];
+
+// Parse full datetime from ActualScanDate: "5/11/2026 6:03:45 AM"
+function parseDT(s) {
+  if (!s || s.trim() === '' || s === 'nan') return null;
+  // Try 12-hr format: M/D/YYYY H:MM:SS AM/PM
+  const m = s.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)/i);
+  if (!m) return null;
+  let h = +m[4];
+  const mn = +m[5], sc = +m[6], ampm = m[7].toUpperCase();
+  if (ampm === 'PM' && h !== 12) h += 12;
+  if (ampm === 'AM' && h === 12) h = 0;
+  return new Date(+m[3], +m[1]-1, +m[2], h, mn, sc);
+}
+
+// Format datetime nicely
+function fmtDT(dt) {
+  if (!dt) return '—';
+  const h = dt.getHours(), mn = dt.getMinutes();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return `${pad(h12)}:${pad(mn)} ${ampm}`;
+}
+
+function fmtDTDate(dt) {
+  if (!dt) return '';
+  return `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+}
+
+// Get all rows for a rack group from all loaded sources
+function bufGetRows(rg, src) {
+  let pool = [];
+  if (src === 'p702') pool = [...p7rows1, ...p7rows2];
+  if (src === 'u6xx') pool = [...u6rows];
+  // P703 uses a synthetic RackGroup key — rows already have it set by p3load
+  if (src === 'p703cc')  pool = p3ccRows;
+  if (src === 'p703tfp') pool = p3tfpRows;
+  return pool.filter(r => (r.RackGroup || '').trim() === rg);
+}
+
+// For a given rack group + date, find the blend closest to 6:00 AM
+// Only consider scans from 4:00 AM to 8:00 AM (shift window), pick closest to 06:00
+// If nothing in window, fall back to closest of the whole day
+function findShiftStart(rows, dateStr) {
+  // dateStr = "5/11/2026"
+  const TARGET = 6 * 60; // 360 mins from midnight
+  const WINDOW_MIN = 4 * 60;  // 4:00 AM
+  const WINDOW_MAX = 8 * 60;  // 8:00 AM
+
+  const dayRows = [];
+  rows.forEach(r => {
+    const dt = parseDT(r.ActualScanDate);
+    if (!dt) return;
+    const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+    if (rowDate !== dateStr) return;
+    if (!(r.PartScanStatus === 'True' || r.PartScanStatus === true || r.PartScanStatus === 'TRUE')) return;
+    dayRows.push({ dt, blend: +r.BlendNumber || 0, rack: r.RackID, mins: dt.getHours()*60 + dt.getMinutes() });
+  });
+
+  if (!dayRows.length) return null;
+
+  // Prefer rows in the 4-8 AM window
+  const window = dayRows.filter(r => r.mins >= WINDOW_MIN && r.mins <= WINDOW_MAX);
+  const pool = window.length ? window : dayRows;
+
+  // Find the row closest to 6:00 AM
+  pool.sort((a, b) => Math.abs(a.mins - TARGET) - Math.abs(b.mins - TARGET));
+  const best = pool[0];
+  return { blend: best.blend, rack: best.rack, time: best.dt, mins: best.mins };
+}
+
+// Get last N unique scan dates for a set of rows (using ActualScanDate date part)
+function getLastNDates(rows, n) {
+  const dateSet = new Set();
+  rows.forEach(r => {
+    const dt = parseDT(r.ActualScanDate);
+    if (!dt) return;
+    const ds = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+    dateSet.add(ds);
+  });
+  return [...dateSet].sort((a,b) => parseDate(b) - parseDate(a)).slice(0, n);
+}
+
+// Save / restore customer inputs so they survive re-renders
+function bufSaveInputs() {
+  document.querySelectorAll('.buf-cust-input').forEach(inp => {
+    const key = inp.dataset.key;
+    if (inp.value.trim()) bufCustInputs[key] = inp.value.trim();
+    else delete bufCustInputs[key];
+  });
+}
+
+function bufRender() {
+  // Collect any existing input values before re-render
+  bufSaveInputs();
+
+  const content = document.getElementById('buf-content');
+  const allP702 = [...p7rows1, ...p7rows2];
+  // Include P703 rows in the "has data" check
+  const allRows = [...allP702, ...u6rows, ...p3ccRows, ...p3tfpRows];
+
+  if (!allRows.length) {
+    content.innerHTML = `<div class="placeholder" style="padding:40px"><div style="font-size:28px;margin-bottom:10px">📊</div><div style="font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:5px">No data yet</div><div>Upload files on the P702, P703, and U6XX tabs first</div></div>`;
+    return;
+  }
+
+  // Group lines by group label
+  const groups = {};
+  BUF_LINES.forEach(line => {
+    if (!groups[line.group]) groups[line.group] = [];
+    groups[line.group].push(line);
+  });
+
+  let html = '';
+  Object.entries(groups).forEach(([groupName, lines]) => {
+    html += `<div class="buf-section"><div class="buf-section-lbl">${groupName}</div><div class="buf-grid">`;
+
+    lines.forEach(line => {
+      const rows = bufGetRows(line.rg, line.src);
+      const isP703 = line.src === 'p703cc' || line.src === 'p703tfp';
+
+      let tableRows = '';
+      if (!rows.length) {
+        tableRows = `<tr><td class="lft" colspan="7" style="padding:14px;color:var(--txt3)">No data — upload the relevant file</td></tr>`;
+      } else if (isP703) {
+        // ── P703 BUFFER: single row — highest Built, Not Shipped blend across entire file
+        const bnsRows = rows.filter(r => r.BuildStatus === 'Built, Not Shipped');
+
+        if (!bnsRows.length) {
+          const shipped = rows.filter(r => r.BuildStatus === 'Built, Shipped');
+          const maxBlend = shipped.length ? Math.max(...shipped.map(r=>+r['Blend No']||0)) : null;
+          tableRows = `<tr><td class="lft" colspan="7" style="padding:14px;color:var(--txt3)">No Built/Not Shipped records. Last shipped blend: <b>${maxBlend ?? '—'}</b></td></tr>`;
+        } else {
+          // Find the single row with the highest blend number
+          const best = bnsRows.reduce((top, r) => (+r['Blend No']||0) > (+top['Blend No']||0) ? r : top, bnsRows[0]);
+          const ourBlend = +best['Blend No'] || 0;
+          const ourRack  = best.RackID;
+          const key      = `${line.rg}|current`;
+          const custVal  = bufCustInputs[key] || '';
+
+          let bufHtml = `<span class="buf-na">—</span>`;
+          let howHtml = `<span style="color:var(--txt3);font-size:10px">Enter customer blend</span>`;
+          if (custVal) {
+            const custNum = parseInt(custVal.replace(/,/g, ''), 10);
+            if (!isNaN(custNum)) {
+              const diff = ourBlend - custNum;
+              const cls  = diff > 0 ? 'buf-pos' : diff < 0 ? 'buf-neg' : 'buf-zero';
+              const sign = diff > 0 ? '+' : '';
+              bufHtml = `<span class="${cls}">${sign}${diff.toLocaleString()}</span>`;
+              howHtml = `<span style="font-size:10px;color:var(--txt3)">${ourBlend.toLocaleString()} − ${custNum.toLocaleString()}</span>`;
+            }
+          }
+          tableRows = `<tr>
+            <td class="t-date" colspan="2" style="color:var(--txt2);font-family:'DM Sans',sans-serif;font-size:12px">Current</td>
+            <td class="t-time" style="color:var(--txt3);font-size:10px">Highest BNS</td>
+            <td class="t-our">${ourBlend}<span class="buf-rack">${ourRack ? 'Rack '+Math.round(+ourRack) : ''}</span></td>
+            <td class="t-cust"><input type="number" class="buf-cust-input" data-key="${key}" data-our="${ourBlend}" placeholder="Enter blend #" value="${custVal}" onchange="bufOnChange(this)" oninput="bufOnChange(this)"></td>
+            <td class="t-buf">${bufHtml}</td>
+            <td class="t-how">${howHtml}</td>
+          </tr>`;
+        }
+      } else {
+        // ── Standard lines: use 6AM scan timestamp
+        const dates = getLastNDates(rows, 3);
+        if (!dates.length) {
+          tableRows = `<tr><td class="lft" colspan="7" style="padding:14px;color:var(--txt3)">No ActualScanDate records found</td></tr>`;
+        } else {
+          dates.forEach(ds => {
+            const result  = findShiftStart(rows, ds);
+            const key     = `${line.rg}|${ds}`;
+            const custVal = bufCustInputs[key] || '';
+            const dtObj   = parseDate(ds);
+            const dayName = dtObj ? DAYS_S[dtObj.getDay()] : '';
+
+            let bufHtml = `<span class="buf-na">—</span>`;
+            let howHtml = `<span style="color:var(--txt3);font-size:10px">Enter customer blend</span>`;
+            if (result && custVal) {
+              const custNum = parseInt(custVal.replace(/,/g, ''), 10);
+              if (!isNaN(custNum)) {
+                const diff = result.blend - custNum;
+                const cls  = diff > 0 ? 'buf-pos' : diff < 0 ? 'buf-neg' : 'buf-zero';
+                const sign = diff > 0 ? '+' : '';
+                bufHtml = `<span class="${cls}">${sign}${diff.toLocaleString()}</span>`;
+                howHtml = `<span style="font-size:10px;color:var(--txt3)">${result.blend} − ${custNum.toLocaleString()}</span>`;
+              }
+            }
+            const ourBlend = result ? result.blend : null;
+            const ourRack  = result ? result.rack  : null;
+            const ourTime  = result ? fmtDT(result.time) : '—';
+            tableRows += `<tr>
+              <td class="t-date">${ds}</td>
+              <td class="t-day">${dayName}</td>
+              <td class="t-time">${ourTime}</td>
+              <td class="t-our">${ourBlend ?? '—'}<span class="buf-rack">${ourRack ? 'Rack ' + Math.round(ourRack) : ''}</span></td>
+              <td class="t-cust"><input type="number" class="buf-cust-input" data-key="${key}" data-our="${ourBlend ?? ''}" placeholder="Enter blend #" value="${custVal}" onchange="bufOnChange(this)" oninput="bufOnChange(this)"></td>
+              <td class="t-buf">${bufHtml}</td>
+              <td class="t-how">${howHtml}</td>
+            </tr>`;
+          });
+        }
+      }
+
+      // Column header differs for P703 (no scan time, shows "Max BNS Blend")
+      const scanColLabel = isP703 ? 'Method' : 'Scan Time';
+      const ourColLabel  = isP703 ? 'Highest Built/NSh Blend' : 'Our Blend @ 6AM';
+      const noteText = isP703
+        ? `<b>P703 Buffer:</b> "Our Blend" = single highest <em>Built, Not Shipped</em> blend across the entire file — this is the furthest unit built and ready to ship. &nbsp;·&nbsp; <span style="color:var(--green)">Positive = ahead of customer</span> &nbsp; <span style="color:var(--red)">Negative = behind</span>`
+        : `<b>Buffer = Our Blend − Customer Blend</b> &nbsp;·&nbsp; Blend numbers are Ford vehicle sequence numbers &nbsp;·&nbsp; <span style="color:var(--green)">Positive = ahead</span> &nbsp; <span style="color:var(--red)">Negative = behind</span>`;
+
+      html += `<div class="buf-card">
+        <div class="buf-card-hdr ${line.groupCls}">
+          <div class="buf-card-name">${line.label}</div>
+          <div class="buf-card-tag">${line.rg}</div>
+        </div>
+        <div class="buf-table-wrap">
+          <table class="buf-table">
+            <thead><tr>
+              <th class="c-date">Date</th>
+              <th class="c-day">Day</th>
+              <th class="c-time">${scanColLabel}</th>
+              <th class="c-our">${ourColLabel}</th>
+              <th class="c-cust">Customer Blend @ 6AM</th>
+              <th class="c-buf">Buffer</th>
+              <th class="c-calc">Calculation</th>
+            </tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+        <div class="buf-calc-note">${noteText}</div>
+      </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  content.innerHTML = html;
+}
+
+// Called when user types in a customer blend input — recalculate buffer inline
+function bufOnChange(inp) {
+  const key = inp.dataset.key;
+  const val = inp.value.trim();
+  if (val) bufCustInputs[key] = val; else delete bufCustInputs[key];
+
+  const row = inp.closest('tr');
+  if (!row) return;
+  const bufCell = row.querySelector('.t-buf');
+  const howCell = row.querySelector('.t-how');
+
+  // Our blend is stored in data-our on the input
+  const ourBlend = parseInt(inp.dataset.our, 10);
+  const custBlend = parseInt(val.replace(/,/g,''), 10);
+
+  if (!val || isNaN(custBlend) || isNaN(ourBlend)) {
+    if (bufCell) bufCell.innerHTML = `<span class="buf-na">—</span>`;
+    if (howCell) howCell.innerHTML = `<span style="color:var(--txt3);font-size:10px">Enter customer blend</span>`;
+    return;
+  }
+  const diff = ourBlend - custBlend;
+  const cls  = diff > 0 ? 'buf-pos' : diff < 0 ? 'buf-neg' : 'buf-zero';
+  const sign = diff > 0 ? '+' : '';
+  if (bufCell) bufCell.innerHTML = `<span class="${cls}">${sign}${diff.toLocaleString()}</span>`;
+  if (howCell) howCell.innerHTML = `<span style="font-size:10px;color:var(--txt3)">${ourBlend.toLocaleString()} − ${custBlend.toLocaleString()}</span>`;
+}
+</script>
+</body>
+</html>
