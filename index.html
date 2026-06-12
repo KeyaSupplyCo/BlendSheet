@@ -614,7 +614,14 @@ function buildTruckPlan(rows2, cfg, title){
   const rhd=rows2.filter(r=>r.RackGroup===cfg.rhd);
   if(!cc.length)return`<div class="placeholder">Upload File 2 to generate the truck loading plan.</div>`;
 
-  // last shipped/built per group
+  // Use BLEND NUMBER to determine last shipped/built — RackIDs cycle 1→999→1 so blend is the reliable ordering key
+  const lsCC_blend =cc.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.BlendNumber||0),0);
+  const lcCC_blend =cc.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.BlendNumber||0),0);
+  const lsLHD_blend=lhd.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.BlendNumber||0),0);
+  const lcLHD_blend=lhd.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.BlendNumber||0),0);
+  const lsRHD_blend=rhd.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.BlendNumber||0),0);
+  const lcRHD_blend=rhd.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.BlendNumber||0),0);
+  // For display only: last rack IDs
   const lsCC =cc.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
   const lcCC =cc.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
   const lsLHD=lhd.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
@@ -622,15 +629,17 @@ function buildTruckPlan(rows2, cfg, title){
   const lsRHD=rhd.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
   const lcRHD=rhd.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus)).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
 
-  // CC unshipped racks sorted
-  const ccRacks=[...new Set(cc.map(r=>+r.RackID||0))].filter(r=>r>lsCC).sort((a,b)=>a-b);
-
-  // CC blend range per rack
+  // CC blend range per rack — must be built BEFORE ccRacks uses it
   const ccByRack={};
   cc.forEach(r=>{const rack=+r.RackID||0,b=+r.BlendNumber||0;
     if(!ccByRack[rack])ccByRack[rack]={min:b,max:b};
     else{ccByRack[rack].min=Math.min(ccByRack[rack].min,b);ccByRack[rack].max=Math.max(ccByRack[rack].max,b);}
   });
+
+  // CC unshipped racks: filter by blend > last shipped blend, sort by min blend (handles rack reset 999→1)
+  const ccRacks=[...new Set(cc.map(r=>+r.RackID||0))]
+    .filter(r=>ccByRack[r] && ccByRack[r].min > lsCC_blend)
+    .sort((a,b)=>ccByRack[a].min - ccByRack[b].min);
 
   // LHD/RHD: min blend per rack (for unambiguous assignment)
   function minBlendByRack(sub){
@@ -642,14 +651,18 @@ function buildTruckPlan(rows2, cfg, title){
   const lhdMinBlend=minBlendByRack(lhd);
   const rhdMinBlend=minBlendByRack(rhd);
 
-  // Unshipped LHD/RHD racks
-  const lhdUnshipped=[...new Set(lhd.map(r=>+r.RackID||0))].filter(r=>r>lsLHD).sort((a,b)=>a-b);
-  const rhdUnshipped=[...new Set(rhd.map(r=>+r.RackID||0))].filter(r=>r>lsRHD).sort((a,b)=>a-b);
+  // Unshipped LHD/RHD racks: filter by min blend > last shipped blend, sort by min blend
+  const lhdUnshipped=[...new Set(lhd.map(r=>+r.RackID||0))]
+    .filter(r=>lhdMinBlend[r]!==undefined && lhdMinBlend[r]>lsLHD_blend)
+    .sort((a,b)=>lhdMinBlend[a]-lhdMinBlend[b]);
+  const rhdUnshipped=[...new Set(rhd.map(r=>+r.RackID||0))]
+    .filter(r=>rhdMinBlend[r]!==undefined && rhdMinBlend[r]>lsRHD_blend)
+    .sort((a,b)=>rhdMinBlend[a]-rhdMinBlend[b]);
 
-  // Truck status helper
-  function tStatus(racks,lastBuilt){
+  // Truck status: compare min blend of each rack against last BUILT blend (handles rack reset)
+  function tStatus(racks,lastBuiltBlend,minBlendLookup){
     if(!racks.length)return'pending';
-    const done=racks.filter(r=>r<=lastBuilt).length;
+    const done=racks.filter(r=>(minBlendLookup[r]||Infinity)<=lastBuiltBlend).length;
     if(done===racks.length)return'built';
     if(done>0)return'partial';
     return'pending';
@@ -672,8 +685,8 @@ function buildTruckPlan(rows2, cfg, title){
     const tLHD=lhdUnshipped.filter(r=>lhdMinBlend[r]>=bMin && lhdMinBlend[r]<=bMax);
     const tRHD=rhdUnshipped.filter(r=>rhdMinBlend[r]>=bMin && rhdMinBlend[r]<=bMax);
 
-    // determine overall truck status
-    const ccSt=tStatus(tCC,lcCC), lhdSt=tStatus(tLHD,lcLHD), rhdSt=tStatus(tRHD,lcRHD);
+    // determine overall truck status using blend numbers
+    const ccSt=tStatus(tCC,lcCC_blend,ccByRack), lhdSt=tStatus(tLHD,lcLHD_blend,lhdMinBlend), rhdSt=tStatus(tRHD,lcRHD_blend,rhdMinBlend);
     const order={built:2,partial:1,pending:0};
     const overall=[ccSt,lhdSt,rhdSt].reduce((w,s)=>order[s]<order[w]?s:w,'built');
 
@@ -1075,7 +1088,12 @@ function buildP703TruckPlan(ccRows, tfpRows) {
 
   const CC_PER_TRUCK = 20;
 
-  // Last shipped rack per line
+  // Use BLEND NUMBER to determine last shipped/built (handles rack reset 1→999→1)
+  const lsCCBlend  = ccRows.filter(r=>r.BuildStatus==='Built, Shipped'&&r.RackID).reduce((m,r)=>Math.max(m,+r['Blend No']||0),0);
+  const lcCCBlend  = ccRows.filter(r=>r.BuildStatus==='Built, Not Shipped'&&r.RackID).reduce((m,r)=>Math.max(m,+r['Blend No']||0),0);
+  const lsTFPBlend = tfpRows.filter(r=>r.BuildStatus==='Built, Shipped'&&r.RackID).reduce((m,r)=>Math.max(m,+r['Blend No']||0),0);
+  const lcTFPBlend = tfpRows.filter(r=>r.BuildStatus==='Built, Not Shipped'&&r.RackID).reduce((m,r)=>Math.max(m,+r['Blend No']||0),0);
+  // For display only: last rack IDs
   const lsCCRack  = ccRows.filter(r=>r.BuildStatus==='Built, Shipped'&&r.RackID).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
   const lcCCRack  = ccRows.filter(r=>r.BuildStatus==='Built, Not Shipped'&&r.RackID).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
   const lsTFPRack = tfpRows.filter(r=>r.BuildStatus==='Built, Shipped'&&r.RackID).reduce((m,r)=>Math.max(m,+r.RackID||0),0);
@@ -1101,8 +1119,13 @@ function buildP703TruckPlan(ccRows, tfpRows) {
     if (!(rk in tfpMinBlend) || b < tfpMinBlend[rk]) tfpMinBlend[rk] = b;
   });
 
-  const ccUnshipped = [...new Set(ccRows.filter(r=>r.RackID&&+r.RackID>lsCCRack).map(r=>+r.RackID))].sort((a,b)=>a-b);
-  const tfpUnshipped = [...new Set(tfpRows.filter(r=>r.RackID&&+r.RackID>lsTFPRack).map(r=>+r.RackID))].sort((a,b)=>a-b);
+  // Unshipped racks: filter by min blend > last shipped blend, sort by min blend
+  const ccUnshipped = [...new Set(ccRows.filter(r=>r.RackID).map(r=>+r.RackID))]
+    .filter(r=>ccByRack[r] && ccByRack[r].min > lsCCBlend)
+    .sort((a,b)=>ccByRack[a].min - ccByRack[b].min);
+  const tfpUnshipped = [...new Set(tfpRows.filter(r=>r.RackID).map(r=>+r.RackID))]
+    .filter(r=>tfpMinBlend[r]!==undefined && tfpMinBlend[r] > lsTFPBlend)
+    .sort((a,b)=>tfpMinBlend[a]-tfpMinBlend[b]);
 
   if (!ccUnshipped.length) return `<div class="placeholder">No pending CC racks found — all appear shipped.</div>`;
 
@@ -1115,14 +1138,14 @@ function buildP703TruckPlan(ccRows, tfpRows) {
     const bMax = Math.max(...tCC.map(r=>ccByRack[r]?ccByRack[r].max:-Infinity));
     // TFP racks assigned by min blend (no overlap)
     const tTFP = tfpUnshipped.filter(rk => tfpMinBlend[rk] >= bMin && tfpMinBlend[rk] <= bMax);
-    // Status per group
-    function tStatus(racks, lastBuilt) {
+    // Status per group — compare min blend of rack against last built blend
+    function tStatus(racks, lastBuiltBlend, minBlendLookup) {
       if (!racks.length) return 'pending';
-      const done = racks.filter(r=>r<=lastBuilt).length;
+      const done = racks.filter(r=>(minBlendLookup[r]||Infinity)<=lastBuiltBlend).length;
       if (done===racks.length) return 'built'; if (done>0) return 'partial'; return 'pending';
     }
-    const ccSt  = tStatus(tCC,  lcCCRack);
-    const tfpSt = tStatus(tTFP, lcTFPRack);
+    const ccSt  = tStatus(tCC,  lcCCBlend,  ccByRack);
+    const tfpSt = tStatus(tTFP, lcTFPBlend, tfpMinBlend);
     const order = {built:2,partial:1,pending:0};
     const overall = [ccSt,tfpSt].reduce((w,s)=>order[s]<order[w]?s:w,'built');
     const tfpBMin = tTFP.length ? Math.min(...tTFP.map(rk=>tfpByRack[rk].min)) : null;
