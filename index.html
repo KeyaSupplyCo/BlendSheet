@@ -206,65 +206,35 @@ tbody tr.tr-tot td.lft{color:var(--txt);font-size:10px;font-family:'DM Mono',mon
 .placeholder{background:var(--surface);border:1.5px dashed var(--border2);border-radius:10px;padding:28px;text-align:center;color:var(--txt3);font-size:12px;}
 
 /* ── BUFFER TAB ── */
-.buf-note{padding:12px 20px;background:var(--cb-bg);border:1px solid var(--cb-bd);border-radius:8px;font-size:12px;color:var(--cb-tx);margin-bottom:18px;display:flex;align-items:flex-start;gap:8px;line-height:1.6;}
+.buf-note{padding:11px 18px;background:var(--cb-bg);border:1px solid var(--cb-bd);border-radius:8px;font-size:12px;color:var(--cb-tx);margin-bottom:20px;line-height:1.6;}
 .buf-note b{font-weight:700;}
-/* 2 cards per row, full width — no horizontal scroll */
-.buf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px;}
-.buf-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
-.buf-card-hdr{padding:11px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;border-left:3px solid var(--blue);}
-.buf-card-hdr.grp-dtp {border-left-color:var(--dtp);}
-.buf-card-hdr.grp-kcap{border-left-color:var(--kcap);}
-.buf-card-hdr.grp-u6xx{border-left-color:var(--u6xx);}
-.buf-card-hdr.grp-p703{border-left-color:var(--p703);}
-.buf-card-name{font-size:14px;font-weight:700;}
-.buf-card-tag{font-size:10px;font-family:'DM Mono',monospace;color:var(--txt3);padding:2px 8px;background:var(--surf2);border:1px solid var(--border);border-radius:4px;}
-/* No overflow-x — table fills card naturally */
-.buf-table-wrap{overflow-x:visible;}
-.buf-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;}
-.buf-table thead th{
-  padding:8px 12px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--txt3);background:var(--surf2);
-  border-bottom:1px solid var(--border);white-space:nowrap;
-}
-.buf-table thead th.c-date  {width:14%;}
-.buf-table thead th.c-day   {width:7%;}
-.buf-table thead th.c-time  {width:12%;}
-.buf-table thead th.c-our   {width:18%;}
-.buf-table thead th.c-cust  {width:22%;}
-.buf-table thead th.c-buf   {width:16%;}
-.buf-table thead th.c-calc  {width:11%;}
-.buf-table tbody td{padding:9px 12px;text-align:left;border-bottom:1px solid #f1f5f9;font-family:'DM Mono',monospace;font-size:12px;vertical-align:middle;}
-.buf-table tbody tr:last-child td{border-bottom:none;}
-.buf-table tbody tr:hover{background:#f8fafc;}
-.buf-table td.t-date{color:var(--txt2);font-family:'DM Sans',sans-serif;font-size:12px;}
-.buf-table td.t-day {color:var(--txt3);font-size:10px;letter-spacing:.05em;}
-.buf-table td.t-time{color:var(--slate);font-size:11px;}
-.buf-table td.t-our {color:var(--blue);font-weight:700;font-size:13px;line-height:1.4;}
-.buf-rack{display:block;color:var(--violet);font-size:10px;font-weight:400;margin-top:1px;}
-.buf-table td.t-cust input{
-  width:100%;border:1px solid var(--border2);border-radius:6px;
-  padding:5px 8px;font-family:'DM Mono',monospace;font-size:12px;
-  color:var(--txt);background:var(--surf2);outline:none;text-align:left;
-  transition:border-color .15s,background .15s;
-}
-.buf-table td.t-cust input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 2px rgba(37,99,235,.08);}
-.buf-table td.t-buf{font-weight:700;font-size:14px;}
-.buf-table td.t-how{font-size:10px;color:var(--txt3);line-height:1.4;}
-.buf-pos{color:var(--green);}
-.buf-neg{color:var(--red);}
-.buf-zero{color:var(--txt3);}
-.buf-na{color:var(--txt3);font-size:11px;font-weight:400;}
-.buf-refresh-btn{display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--txt2);transition:all .15s;}
-.buf-refresh-btn:hover{border-color:var(--blue);color:var(--blue);}
-.buf-top-bar{padding:0 28px 14px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-.buf-top-info{font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);line-height:1.7;}
-.buf-top-info span{color:var(--txt2);}
-.buf-section-lbl{font-family:'DM Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;display:flex;align-items:center;gap:10px;}
-.buf-section-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
-.buf-section{margin-bottom:26px;}
-.buf-calc-note{padding:10px 18px;background:var(--surf2);border-top:1px solid var(--border);font-size:11px;color:var(--txt3);line-height:1.6;}
-.buf-calc-note b{color:var(--txt2);}
-@media(max-width:900px){.buf-grid{grid-template-columns:1fr;}}
+
+/* Single unified buffer table */
+.buf-grid{display:flex;flex-direction:column;gap:14px;margin-bottom:24px;}
+.buf-table-outer{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:24px;}
+.buf-group-hdr{padding:9px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surf2);}
+.buf-group-pill{padding:2px 12px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;}
+.buf-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.buf-tbl thead th{padding:8px 14px;text-align:left;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);background:var(--surf2);border-bottom:1px solid var(--border);white-space:nowrap;}
+.buf-tbl tbody td{padding:10px 14px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+.buf-tbl tbody tr:last-child td{border-bottom:none;}
+.buf-tbl tbody tr:hover{background:#f8fafc;}
+.buf-tbl td.td-line{font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap;min-width:110px;}
+.buf-tbl td.td-line span{display:block;font-size:9px;font-weight:400;color:var(--txt3);font-family:'DM Mono',monospace;margin-top:1px;}
+.buf-tbl td.td-blend{min-width:140px;}
+.buf-blend-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--blue);}
+.buf-blend-sub{font-size:10px;color:var(--violet);font-family:'DM Mono',monospace;margin-top:1px;}
+.buf-blend-time{font-size:9px;color:var(--txt3);margin-top:1px;}
+.buf-close-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--slate);}
+.buf-prod-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:700;color:var(--green);}
+.buf-prod-sub{font-size:9px;color:var(--txt3);margin-top:1px;}
+.buf-na-cell{color:var(--border2);font-family:'DM Mono',monospace;font-size:11px;}
+.buf-tbl td.td-cust input{width:130px;border:1px solid var(--border2);border-radius:6px;padding:5px 8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--txt);background:var(--surf2);outline:none;transition:border-color .15s;}
+.buf-tbl td.td-cust input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 2px rgba(37,99,235,.08);}
+.buf-result-val{font-family:'DM Mono',monospace;font-size:15px;font-weight:700;}
+.buf-calc-sub{font-size:9px;color:var(--txt3);margin-top:2px;font-family:'DM Mono',monospace;}
+.buf-table-note{padding:8px 18px;background:var(--surf2);border-top:1px solid var(--border);font-size:10px;color:var(--txt3);line-height:1.5;}
+.buf-table-note b{color:var(--txt2);}
 
 /* ── LOADING ── */
 .load-ov{position:fixed;inset:0;background:rgba(244,246,249,.92);display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:999;}
@@ -469,22 +439,27 @@ tbody tr.tr-tot td.lft{color:var(--txt);font-size:10px;font-family:'DM Mono',mon
   <div class="buf-top-bar" style="padding-top:18px">
     <div>
       <div style="font-size:15px;font-weight:700;margin-bottom:3px">6 AM Shift-Start Buffer Analysis</div>
-      <div class="buf-top-info">Last <span>3 production days</span> · First blend at or near <span>6:00 AM</span> per line · Upload files on other tabs first</div>
+      <div class="buf-top-info">Select a production date · First blend at or near <span>6:00 AM</span> per line</div>
     </div>
-    <button class="buf-refresh-btn" onclick="bufRender()">⟳ Refresh</button>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase">Production Date</label>
+        <select id="buf-date-sel" onchange="bufSelDate=this.value;bufRender()" style="background:var(--surface);border:1px solid var(--border2);color:var(--txt);padding:5px 10px;border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;outline:none;cursor:pointer;min-width:140px">
+          <option value="">— select date —</option>
+        </select>
+      </div>
+      <button class="buf-refresh-btn" onclick="bufRefreshDates();bufRender()">⟳ Refresh</button>
+    </div>
   </div>
   <div style="padding:0 28px 6px">
     <div class="buf-note">
-      <span>ℹ</span>
-      <div>
-        <b>How the buffer is calculated:</b> Blend numbers are Ford vehicle sequence numbers shared across all lines. For each production line, we find the first part scanned closest to 6:00 AM (within a 4–8 AM window). You enter the customer's blend number at their 6:00 AM. <b>Buffer = Our Blend − Customer Blend</b> on that same line. Since all lines use the same vehicle sequence, a positive number means you are that many vehicles ahead of the customer. Negative means the customer is ahead of you — you need to produce more to catch up.
-      </div>
+      <b>Yesterday's Production</b> = first blend scanned at or after 6:00 AM on selected date → last blend scanned before 6:00 AM the next day. Count between those two = shift output. Enter the customer's 6 AM blend to calculate your buffer.
     </div>
   </div>
   <div id="buf-content" style="padding:0 28px 40px">
     <div class="placeholder" style="padding:40px">
       <div style="font-size:28px;margin-bottom:10px">📊</div>
-      <div style="font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:5px">Upload files on the P702 and U6XX tabs first</div>
+      <div style="font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:5px">Upload files on the P702, P703, and U6XX tabs first</div>
       <div>Buffer analysis uses ActualScanDate timestamps from all uploaded CSVs</div>
     </div>
   </div>
@@ -518,6 +493,7 @@ let p3ccRows=[], p3tfpRows=[], p3fFrom=null, p3fTo=null;
 let u6rows=[], u6fFrom=null, u6fTo=null;
 // Buffer: customer blend inputs keyed by "rg|dateStr"
 let bufCustInputs={};
+let bufSelDate='';
 
 function pad(n){return String(n).padStart(2,'0');}
 function tick(){const n=new Date();document.getElementById('clock').textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;}
@@ -570,8 +546,11 @@ function cv(n,cls){return n?`<td class="${cls}">${n}</td>`:`<td class="v-0">—<
 // ═══════════════════════════════════════════════════════════════════════════
 function p7computeRG(rows,rg){
   const rr=rows.filter(r=>r.RackGroup===rg);
+  // Deduplicate: keep only first occurrence of each BlendNumber within this rack group
+  const seen=new Set();
+  const deduped=rr.filter(r=>{const k=r.BlendNumber;if(seen.has(k))return false;seen.add(k);return true;});
   const byShip={};const dAll=new Set();
-  rr.forEach(r=>{
+  deduped.forEach(r=>{
     const s=bool(r.ShipStatus),sc=bool(r.PartScanStatus);
     const d=parseDate(r.ShipDate);const b=+r.BlendNumber||0;
     if(d){const ds=fmtDate(d);dAll.add(ds);if(!byShip[ds])byShip[ds]={s:0,bn:0,nb:0,tot:0,blends:[]};
@@ -579,9 +558,9 @@ function p7computeRG(rows,rg){
       if(s&&sc)bk.s++;else if(!s&&sc)bk.bn++;else bk.nb++;}
   });
   const shipDates=[...dAll].sort((a,b)=>parseDate(a)-parseDate(b));
-  const sR=rr.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus));
-  const bR=rr.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus));
-  return{byShip,shipDates,total:rr.length,
+  const sR=deduped.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus));
+  const bR=deduped.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus));
+  return{byShip,shipDates,total:deduped.length,
     lsRack:sR.length?Math.max(...sR.map(r=>+r.RackID||0)):null,
     lsBlend:sR.length?Math.max(...sR.map(r=>+r.BlendNumber||0)):null,
     lcRack:bR.length?Math.max(...bR.map(r=>+r.RackID||0)):null,
@@ -599,19 +578,20 @@ function p7makeCard(sec,rows){
     <div class="stat-item"><div class="stat-lbl">Last Completed Blend</div><div class="stat-val sv-s">${d.lcBlend??'—'}</div></div>
   </div>`;
   let tbody='';
-  if(!d.shipDates.length){tbody=`<tr><td class="lft" colspan="7" style="padding:14px;color:var(--txt3)">No data</td></tr>`;}
+  if(!d.shipDates.length){tbody=`<tr><td class="lft" colspan="8" style="padding:14px;color:var(--txt3)">No data</td></tr>`;}
   else{
-    let tS=0,tBN=0,tNB=0,tT=0,mx=0;
+    let tS=0,tBN=0,tNB=0,tT=0,mx=0,mn=Infinity;
     d.shipDates.forEach(ds=>{
       const b=d.byShip[ds],dt=parseDate(ds),dow=dt?DAYS_S[dt.getDay()]:'';
       const m=b.blends.length?Math.max(...b.blends):0;
-      if(m>mx)mx=m;tS+=b.s;tBN+=b.bn;tNB+=b.nb;tT+=b.tot;
+      const n=b.blends.length?Math.min(...b.blends):0;
+      if(m>mx)mx=m;if(n<mn)mn=n;tS+=b.s;tBN+=b.bn;tNB+=b.nb;tT+=b.tot;
       const iT=ds===todayStr;
-      tbody+=`<tr class="${iT?'tr-today':''}"><td class="lft">${ds}${iT?' ◀':''}</td><td class="dow">${dow}</td>${cv(b.s,'v-s')}${cv(b.bn,'v-bn')}${cv(b.nb,'v-nb')}<td class="v-t">${b.tot}</td><td class="v-hi">${m||'—'}</td></tr>`;
+      tbody+=`<tr class="${iT?'tr-today':''}"><td class="lft">${ds}${iT?' ◀':''}</td><td class="dow">${dow}</td>${cv(b.s,'v-s')}${cv(b.bn,'v-bn')}${cv(b.nb,'v-nb')}<td class="v-t">${b.tot}</td><td class="v-hi">${n||'—'}</td><td class="v-hi">${m||'—'}</td></tr>`;
     });
-    tbody+=`<tr class="tr-tot"><td class="lft">TOTAL</td><td></td><td class="v-s">${tS}</td><td class="v-bn">${tBN}</td><td class="v-nb">${tNB}</td><td class="v-t">${tT}</td><td class="v-hi">${mx||'—'}</td></tr>`;
+    tbody+=`<tr class="tr-tot"><td class="lft">TOTAL</td><td></td><td class="v-s">${tS}</td><td class="v-bn">${tBN}</td><td class="v-nb">${tNB}</td><td class="v-t">${tT}</td><td class="v-hi">${mn===Infinity?'—':mn}</td><td class="v-hi">${mx||'—'}</td></tr>`;
   }
-  return`<div class="scard"><div class="scard-hdr ${ac}"><div class="scard-name">${sec.label}</div><div class="scard-count">${d.total.toLocaleString()} blends</div></div>${sb}<div class="scard-wrap"><table><thead><tr><th class="lft">Ship Date</th><th>Day</th><th>Shipped</th><th>Blt/NSh</th><th>Not Blt</th><th>Total</th><th>Max Blend</th></tr></thead><tbody>${tbody}</tbody></table></div></div>`;
+  return`<div class="scard"><div class="scard-hdr ${ac}"><div class="scard-name">${sec.label}</div><div class="scard-count">${d.total.toLocaleString()} blends</div></div>${sb}<div class="scard-wrap"><table><thead><tr><th class="lft">Ship Date</th><th>Day</th><th>Shipped</th><th>Blt/NSh</th><th>Not Blt</th><th>Total</th><th>Min Blend</th><th>Max Blend</th></tr></thead><tbody>${tbody}</tbody></table></div></div>`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -746,7 +726,9 @@ function p7render(){
   const content=document.getElementById('p7-content');
   if(!all.length){content.innerHTML=`<div class="placeholder" style="padding:40px;margin-top:0">No data in selected range.</div>`;return;}
   let gtS=0,gtBN=0,gtNB=0,gtT=0;
-  all.forEach(r=>{const s=bool(r.ShipStatus),sc=bool(r.PartScanStatus);gtT++;if(s&&sc)gtS++;else if(!s&&sc)gtBN++;else gtNB++;});
+  // Deduplicate across both files by BlendNumber before counting grand totals
+  const seenAll=new Set();
+  all.forEach(r=>{if(seenAll.has(r.BlendNumber))return;seenAll.add(r.BlendNumber);const s=bool(r.ShipStatus),sc=bool(r.PartScanStatus);gtT++;if(s&&sc)gtS++;else if(!s&&sc)gtBN++;else gtNB++;});
   ['p7-ch-s','p7-ch-b','p7-ch-n','p7-ch-t'].forEach(id=>document.getElementById(id).classList.add('show'));
   document.getElementById('p7-chv-s').textContent=gtS.toLocaleString();
   document.getElementById('p7-chv-b').textContent=gtBN.toLocaleString();
@@ -805,7 +787,7 @@ function p7loadFile(n,file){
       document.getElementById(`p7-d${si}g`).className='dot ok';document.getElementById(`p7-l${si}g`).textContent=racks.join(', ');document.getElementById(`p7-sr${si}g`).className='sr on';
       p7updateMeta();p7render();
       // refresh buffer tab if it has data
-      if(document.getElementById('page-buf').classList.contains('active')) bufRender();
+      bufRefreshDates(); if(document.getElementById('page-buf').classList.contains('active')) bufRender();
     }catch(err){alert('Error: '+err.message);}
     document.getElementById('loadOv').style.display='none';
   };
@@ -831,8 +813,11 @@ function u6filterRows(rows){
 
 function u6computeRG(rows,rg){
   const rr=rows.filter(r=>(r.RackGroup||'').trim()===rg);
+  // Deduplicate: keep only first occurrence of each BlendNumber within this rack group
+  const seen=new Set();
+  const deduped=rr.filter(r=>{const k=r.BlendNumber;if(seen.has(k))return false;seen.add(k);return true;});
   const byShip={};const dAll=new Set();
-  rr.forEach(r=>{
+  deduped.forEach(r=>{
     const s=bool(r.ShipStatus),sc=bool(r.PartScanStatus);
     const d=parseDate(r.ShipDate);const b=+r.BlendNumber||0;
     if(d){const ds=fmtDate(d);dAll.add(ds);if(!byShip[ds])byShip[ds]={s:0,bn:0,nb:0,tot:0,blends:[]};
@@ -840,9 +825,9 @@ function u6computeRG(rows,rg){
       if(s&&sc)bk.s++;else if(!s&&sc)bk.bn++;else bk.nb++;}
   });
   const shipDates=[...dAll].sort((a,b)=>parseDate(a)-parseDate(b));
-  const sR=rr.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus));
-  const bR=rr.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus));
-  return{byShip,shipDates,total:rr.length,
+  const sR=deduped.filter(r=>bool(r.ShipStatus)&&bool(r.PartScanStatus));
+  const bR=deduped.filter(r=>!bool(r.ShipStatus)&&bool(r.PartScanStatus));
+  return{byShip,shipDates,total:deduped.length,
     lsRack:sR.length?Math.max(...sR.map(r=>+r.RackID||0)):null,
     lsBlend:sR.length?Math.max(...sR.map(r=>+r.BlendNumber||0)):null,
     lcRack:bR.length?Math.max(...bR.map(r=>+r.RackID||0)):null,
@@ -859,19 +844,20 @@ function u6makeCard(rg,rows){
     <div class="stat-item"><div class="stat-lbl">Last Completed Blend</div><div class="stat-val sv-s">${d.lcBlend??'—'}</div></div>
   </div>`;
   let tbody='';
-  if(!d.shipDates.length){tbody=`<tr><td class="lft" colspan="7" style="padding:14px;color:var(--txt3)">No data</td></tr>`;}
+  if(!d.shipDates.length){tbody=`<tr><td class="lft" colspan="8" style="padding:14px;color:var(--txt3)">No data</td></tr>`;}
   else{
-    let tS=0,tBN=0,tNB=0,tT=0,mx=0;
+    let tS=0,tBN=0,tNB=0,tT=0,mx=0,mn=Infinity;
     d.shipDates.forEach(ds=>{
       const b=d.byShip[ds],dt=parseDate(ds),dow=dt?DAYS_S[dt.getDay()]:'';
       const m=b.blends.length?Math.max(...b.blends):0;
-      if(m>mx)mx=m;tS+=b.s;tBN+=b.bn;tNB+=b.nb;tT+=b.tot;
+      const n=b.blends.length?Math.min(...b.blends):0;
+      if(m>mx)mx=m;if(n<mn)mn=n;tS+=b.s;tBN+=b.bn;tNB+=b.nb;tT+=b.tot;
       const iT=ds===todayStr;
-      tbody+=`<tr class="${iT?'tr-today':''}"><td class="lft">${ds}${iT?' ◀':''}</td><td class="dow">${dow}</td>${cv(b.s,'v-s')}${cv(b.bn,'v-bn')}${cv(b.nb,'v-nb')}<td class="v-t">${b.tot}</td><td class="v-hi">${m||'—'}</td></tr>`;
+      tbody+=`<tr class="${iT?'tr-today':''}"><td class="lft">${ds}${iT?' ◀':''}</td><td class="dow">${dow}</td>${cv(b.s,'v-s')}${cv(b.bn,'v-bn')}${cv(b.nb,'v-nb')}<td class="v-t">${b.tot}</td><td class="v-hi">${n||'—'}</td><td class="v-hi">${m||'—'}</td></tr>`;
     });
-    tbody+=`<tr class="tr-tot"><td class="lft">TOTAL</td><td></td><td class="v-s">${tS}</td><td class="v-bn">${tBN}</td><td class="v-nb">${tNB}</td><td class="v-t">${tT}</td><td class="v-hi">${mx||'—'}</td></tr>`;
+    tbody+=`<tr class="tr-tot"><td class="lft">TOTAL</td><td></td><td class="v-s">${tS}</td><td class="v-bn">${tBN}</td><td class="v-nb">${tNB}</td><td class="v-t">${tT}</td><td class="v-hi">${mn===Infinity?'—':mn}</td><td class="v-hi">${mx||'—'}</td></tr>`;
   }
-  return`<div class="scard"><div class="scard-hdr u6"><div class="scard-name">${rg}</div><div class="scard-count">${d.total.toLocaleString()} blends</div></div>${sb}<div class="scard-wrap"><table><thead><tr><th class="lft">Ship Date</th><th>Day</th><th>Shipped</th><th>Blt/NSh</th><th>Not Blt</th><th>Total</th><th>Max Blend</th></tr></thead><tbody>${tbody}</tbody></table></div></div>`;
+  return`<div class="scard"><div class="scard-hdr u6"><div class="scard-name">${rg}</div><div class="scard-count">${d.total.toLocaleString()} blends</div></div>${sb}<div class="scard-wrap"><table><thead><tr><th class="lft">Ship Date</th><th>Day</th><th>Shipped</th><th>Blt/NSh</th><th>Not Blt</th><th>Total</th><th>Min Blend</th><th>Max Blend</th></tr></thead><tbody>${tbody}</tbody></table></div></div>`;
 }
 
 function u6render(){
@@ -879,7 +865,8 @@ function u6render(){
   const content=document.getElementById('u6-content');
   if(!fr.length){content.innerHTML=`<div class="placeholder" style="padding:40px;margin-top:0">No data in selected range.</div>`;return;}
   let gtS=0,gtBN=0,gtNB=0,gtT=0;
-  fr.forEach(r=>{const s=bool(r.ShipStatus),sc=bool(r.PartScanStatus);gtT++;if(s&&sc)gtS++;else if(!s&&sc)gtBN++;else gtNB++;});
+  const seenU6=new Set();
+  fr.forEach(r=>{if(seenU6.has(r.BlendNumber))return;seenU6.add(r.BlendNumber);const s=bool(r.ShipStatus),sc=bool(r.PartScanStatus);gtT++;if(s&&sc)gtS++;else if(!s&&sc)gtBN++;else gtNB++;});
   ['u6-ch-s','u6-ch-b','u6-ch-n','u6-ch-t'].forEach(id=>document.getElementById(id).classList.add('show'));
   document.getElementById('u6-chv-s').textContent=gtS.toLocaleString();
   document.getElementById('u6-chv-b').textContent=gtBN.toLocaleString();
@@ -916,7 +903,7 @@ function u6loadFile(file){
       document.getElementById('u6-filter').style.display='flex';
       document.getElementById('mU6XX').textContent=parsed.length.toLocaleString()+' blends';
       u6render();
-      if(document.getElementById('page-buf').classList.contains('active')) bufRender();
+      bufRefreshDates(); if(document.getElementById('page-buf').classList.contains('active')) bufRender();
     }catch(err){alert('Error: '+err.message);}
     document.getElementById('loadOv').style.display='none';
   };
@@ -1002,9 +989,14 @@ function p3filterRows(rows) {
 }
 
 function p3computeLine(rows) {
+  // Deduplicate: keep only first occurrence of each Blend No
+  const seen = new Set();
+  const deduped = rows.filter(r => {
+    const k = r['Blend No']; if (seen.has(k)) return false; seen.add(k); return true;
+  });
   // Group by ship date
   const byShip = {}; const dAll = new Set();
-  rows.forEach(r => {
+  deduped.forEach(r => {
     const d = p3parseShipDate(r['Customer Ship Date']); if (!d) return;
     const ds = fmtDate(d); dAll.add(ds);
     if (!byShip[ds]) byShip[ds] = {s:0, bn:0, nb:0, tot:0, blends:[]};
@@ -1017,10 +1009,10 @@ function p3computeLine(rows) {
     else                                  b.nb++;
   });
   const shipDates = [...dAll].sort((a,b) => parseDate(a) - parseDate(b));
-  const sR = rows.filter(r => r.BuildStatus === 'Built, Shipped');
-  const bR = rows.filter(r => r.BuildStatus === 'Built, Not Shipped');
+  const sR = deduped.filter(r => r.BuildStatus === 'Built, Shipped');
+  const bR = deduped.filter(r => r.BuildStatus === 'Built, Not Shipped');
   return {
-    byShip, shipDates, total: rows.length,
+    byShip, shipDates, total: deduped.length,
     lsRack:  sR.length ? Math.max(...sR.map(r => +r['Rack ID']||0)) : null,
     lsBlend: sR.length ? Math.max(...sR.map(r => +r['Blend No']||0)) : null,
     lcRack:  bR.length ? Math.max(...bR.map(r => +r['Rack ID']||0)) : null,
@@ -1038,17 +1030,18 @@ function p3makeCard(label, accent, pcsPerRack, truckRacks, truckPcs, rows) {
   </div>`;
   let tbody = '';
   if (!d.shipDates.length) {
-    tbody = `<tr><td class="lft" colspan="7" style="padding:14px;color:var(--txt3)">No data</td></tr>`;
+    tbody = `<tr><td class="lft" colspan="8" style="padding:14px;color:var(--txt3)">No data</td></tr>`;
   } else {
-    let tS=0, tBN=0, tNB=0, tT=0, mx=0;
+    let tS=0, tBN=0, tNB=0, tT=0, mx=0, mn=Infinity;
     d.shipDates.forEach(ds => {
       const b = d.byShip[ds], dt = parseDate(ds), dow = dt ? DAYS_S[dt.getDay()] : '';
       const m = b.blends.length ? Math.max(...b.blends) : 0;
-      if (m > mx) mx = m; tS+=b.s; tBN+=b.bn; tNB+=b.nb; tT+=b.tot;
+      const n = b.blends.length ? Math.min(...b.blends) : 0;
+      if (m > mx) mx = m; if (n < mn) mn = n; tS+=b.s; tBN+=b.bn; tNB+=b.nb; tT+=b.tot;
       const iT = ds === todayStr;
-      tbody += `<tr class="${iT?'tr-today':''}"><td class="lft">${ds}${iT?' ◀':''}</td><td class="dow">${dow}</td>${cv(b.s,'v-s')}${cv(b.bn,'v-bn')}${cv(b.nb,'v-nb')}<td class="v-t">${b.tot}</td><td class="v-hi">${m||'—'}</td></tr>`;
+      tbody += `<tr class="${iT?'tr-today':''}"><td class="lft">${ds}${iT?' ◀':''}</td><td class="dow">${dow}</td>${cv(b.s,'v-s')}${cv(b.bn,'v-bn')}${cv(b.nb,'v-nb')}<td class="v-t">${b.tot}</td><td class="v-hi">${n||'—'}</td><td class="v-hi">${m||'—'}</td></tr>`;
     });
-    tbody += `<tr class="tr-tot"><td class="lft">TOTAL</td><td></td><td class="v-s">${tS}</td><td class="v-bn">${tBN}</td><td class="v-nb">${tNB}</td><td class="v-t">${tT}</td><td class="v-hi">${mx||'—'}</td></tr>`;
+    tbody += `<tr class="tr-tot"><td class="lft">TOTAL</td><td></td><td class="v-s">${tS}</td><td class="v-bn">${tBN}</td><td class="v-nb">${tNB}</td><td class="v-t">${tT}</td><td class="v-hi">${mn===Infinity?'—':mn}</td><td class="v-hi">${mx||'—'}</td></tr>`;
   }
   return `<div class="scard">
     <div class="scard-hdr ${accent}">
@@ -1057,7 +1050,7 @@ function p3makeCard(label, accent, pcsPerRack, truckRacks, truckPcs, rows) {
     </div>
     ${sb}
     <div class="scard-wrap"><table>
-      <thead><tr><th class="lft">Ship Date</th><th>Day</th><th>Shipped</th><th>Blt/NSh</th><th>Not Blt</th><th>Total</th><th>Max Blend</th></tr></thead>
+      <thead><tr><th class="lft">Ship Date</th><th>Day</th><th>Shipped</th><th>Blt/NSh</th><th>Not Blt</th><th>Total</th><th>Min Blend</th><th>Max Blend</th></tr></thead>
       <tbody>${tbody}</tbody>
     </table></div>
   </div>`;
@@ -1180,7 +1173,9 @@ function p3render() {
   if (!all.length) { content.innerHTML = `<div class="placeholder" style="padding:40px;margin-top:0">Upload P703 CSV files to begin.</div>`; return; }
 
   let gtS=0, gtBN=0, gtNB=0, gtT=0;
+  const seenP3=new Set();
   all.forEach(r => {
+    const k=r['Blend No']; if(seenP3.has(k))return; seenP3.add(k);
     gtT++;
     const bs = r.BuildStatus;
     if (bs === 'Built, Shipped') gtS++;
@@ -1257,7 +1252,7 @@ function p3loadFile(n, file) {
       const bsVals = [...new Set(parsed.map(r=>r.BuildStatus))].join(', ');
       document.getElementById(`p3-d${n}g`).className='dot ok'; document.getElementById(`p3-l${n}g`).textContent=bsVals; document.getElementById(`p3-sr${n}g`).className='sr on';
       p3updateMeta(); p3render();
-      if (document.getElementById('page-buf').classList.contains('active')) bufRender();
+      bufRefreshDates(); if (document.getElementById('page-buf').classList.contains('active')) bufRender();
     } catch(err) { alert('Error: '+err.message); }
     document.getElementById('loadOv').style.display = 'none';
   };
@@ -1284,22 +1279,9 @@ function p3ClearFilter() {
   p3fFrom = p3fTo = null; p3render();
 }
 
-// Extend buffer's findShiftStart to handle P703 scan date format "2026-05-12 10:14:03"
-// Override parseDT to also handle ISO-ish format
-const _origParseDT = parseDT;
-function parseDT(s) {
-  if (!s || s.trim() === '' || s === 'nan' || s === 'Not Yet Loaded' || s === 'Not Yet Shipped') return null;
-  // Try original 12hr format first
-  const r1 = _origParseDT(s);
-  if (r1) return r1;
-  // Try "YYYY-MM-DD HH:MM:SS" (24hr, P703 format)
-  const m = s.trim().match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
-  if (m) return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
-  return null;
-}
-
-// Also extend getLastNDates to handle P703 ActualScanDate format
-// (already handled by the overridden parseDT above)
+// ═══════════════════════════════════════════════════════════════════════════
+// BUFFER ANALYSIS
+// ═══════════════════════════════════════════════════════════════════════════
 
 // All production lines to analyze
 const BUF_LINES = [
@@ -1317,17 +1299,25 @@ const BUF_LINES = [
   { rg:'P703TFP',    label:'P703 TFP',      group:'P703 — AP02A', groupCls:'grp-p703', src:'p703tfp' },
 ];
 
-// Parse full datetime from ActualScanDate: "5/11/2026 6:03:45 AM"
+// Parse full datetime — handles BOTH formats:
+//   P702/U6XX: "5/11/2026 6:03:45 AM"  (12-hr with AM/PM)
+//   P703:      "2026-05-11 06:03:45"    (ISO 24-hr)
 function parseDT(s) {
-  if (!s || s.trim() === '' || s === 'nan') return null;
-  // Try 12-hr format: M/D/YYYY H:MM:SS AM/PM
-  const m = s.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)/i);
-  if (!m) return null;
-  let h = +m[4];
-  const mn = +m[5], sc = +m[6], ampm = m[7].toUpperCase();
-  if (ampm === 'PM' && h !== 12) h += 12;
-  if (ampm === 'AM' && h === 12) h = 0;
-  return new Date(+m[3], +m[1]-1, +m[2], h, mn, sc);
+  if (!s || s.trim() === '' || s === 'nan' || s === 'Not Yet Loaded' || s === 'Not Yet Shipped') return null;
+  const str = s.trim();
+  // 12-hr: M/D/YYYY H:MM:SS AM/PM
+  const m1 = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)/i);
+  if (m1) {
+    let h = +m1[4];
+    const mn = +m1[5], sc = +m1[6], ampm = m1[7].toUpperCase();
+    if (ampm === 'PM' && h !== 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+    return new Date(+m1[3], +m1[1]-1, +m1[2], h, mn, sc);
+  }
+  // ISO 24-hr: YYYY-MM-DD HH:MM:SS
+  const m2 = str.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+  if (m2) return new Date(+m2[1], +m2[2]-1, +m2[3], +m2[4], +m2[5], +m2[6]);
+  return null;
 }
 
 // Format datetime nicely
@@ -1349,44 +1339,12 @@ function bufGetRows(rg, src) {
   let pool = [];
   if (src === 'p702') pool = [...p7rows1, ...p7rows2];
   if (src === 'u6xx') pool = [...u6rows];
-  // P703 uses a synthetic RackGroup key — rows already have it set by p3load
   if (src === 'p703cc')  pool = p3ccRows;
   if (src === 'p703tfp') pool = p3tfpRows;
   return pool.filter(r => (r.RackGroup || '').trim() === rg);
 }
 
-// For a given rack group + date, find the blend closest to 6:00 AM
-// Only consider scans from 4:00 AM to 8:00 AM (shift window), pick closest to 06:00
-// If nothing in window, fall back to closest of the whole day
-function findShiftStart(rows, dateStr) {
-  // dateStr = "5/11/2026"
-  const TARGET = 6 * 60; // 360 mins from midnight
-  const WINDOW_MIN = 4 * 60;  // 4:00 AM
-  const WINDOW_MAX = 8 * 60;  // 8:00 AM
-
-  const dayRows = [];
-  rows.forEach(r => {
-    const dt = parseDT(r.ActualScanDate);
-    if (!dt) return;
-    const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
-    if (rowDate !== dateStr) return;
-    if (!(r.PartScanStatus === 'True' || r.PartScanStatus === true || r.PartScanStatus === 'TRUE')) return;
-    dayRows.push({ dt, blend: +r.BlendNumber || 0, rack: r.RackID, mins: dt.getHours()*60 + dt.getMinutes() });
-  });
-
-  if (!dayRows.length) return null;
-
-  // Prefer rows in the 4-8 AM window
-  const window = dayRows.filter(r => r.mins >= WINDOW_MIN && r.mins <= WINDOW_MAX);
-  const pool = window.length ? window : dayRows;
-
-  // Find the row closest to 6:00 AM
-  pool.sort((a, b) => Math.abs(a.mins - TARGET) - Math.abs(b.mins - TARGET));
-  const best = pool[0];
-  return { blend: best.blend, rack: best.rack, time: best.dt, mins: best.mins };
-}
-
-// Get last N unique scan dates for a set of rows (using ActualScanDate date part)
+// Get last N unique scan dates, oldest-first for display
 function getLastNDates(rows, n) {
   const dateSet = new Set();
   rows.forEach(r => {
@@ -1395,7 +1353,158 @@ function getLastNDates(rows, n) {
     const ds = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
     dateSet.add(ds);
   });
-  return [...dateSet].sort((a,b) => parseDate(b) - parseDate(a)).slice(0, n);
+  const sorted = [...dateSet].sort((a,b) => parseDate(b) - parseDate(a));
+  return sorted.slice(0, n).reverse();
+}
+
+// Find first scan >= 6:00 AM on dateStr (the shift opener)
+function findShiftStart(rows, dateStr) {
+  const TARGET = 6 * 60, WINDOW_MIN = 4 * 60, WINDOW_MAX = 8 * 60;
+  const dayRows = [];
+  rows.forEach(r => {
+    const dt = parseDT(r.ActualScanDate);
+    if (!dt) return;
+    const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+    if (rowDate !== dateStr) return;
+    if (!(r.PartScanStatus === 'True' || r.PartScanStatus === true || r.PartScanStatus === 'TRUE')) return;
+    dayRows.push({ dt, blend: +r.BlendNumber||0, rack: r.RackID, mins: dt.getHours()*60+dt.getMinutes() });
+  });
+  if (!dayRows.length) return null;
+  const window = dayRows.filter(r => r.mins >= WINDOW_MIN && r.mins <= WINDOW_MAX);
+  const pool = window.length ? window : dayRows;
+  pool.sort((a,b) => Math.abs(a.mins - TARGET) - Math.abs(b.mins - TARGET));
+  return { blend: pool[0].blend, rack: pool[0].rack, time: pool[0].dt };
+}
+
+// Find the last scan BEFORE 6:00 AM on nextDateStr (the shift closer for dateStr's shift)
+// = last blend of the night, before the 6AM handoff on the following day
+function findShiftClose(rows, nextDateStr) {
+  const CUTOFF = 6 * 60; // 6:00 AM
+  const dayRows = [];
+  rows.forEach(r => {
+    const dt = parseDT(r.ActualScanDate);
+    if (!dt) return;
+    const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+    if (rowDate !== nextDateStr) return;
+    if (!(r.PartScanStatus === 'True' || r.PartScanStatus === true || r.PartScanStatus === 'TRUE')) return;
+    const mins = dt.getHours()*60 + dt.getMinutes();
+    if (mins >= CUTOFF) return; // only before 6AM
+    dayRows.push({ dt, blend: +r.BlendNumber||0, rack: r.RackID, mins });
+  });
+  if (!dayRows.length) return null;
+  dayRows.sort((a,b) => b.dt - a.dt); // latest first
+  return { blend: dayRows[0].blend, rack: dayRows[0].rack, time: dayRows[0].dt };
+}
+
+// Count distinct blends scanned in the shift window:
+// from opener (first scan >= 6AM on dateStr) to closer (last scan < 6AM on nextDateStr)
+// Both endpoints inclusive
+function countYesterdayProduction(rows, dateStr, nextDateStr) {
+  // Collect all scanned blends from 6AM on dateStr through end of dateStr
+  // PLUS all blends before 6AM on nextDateStr
+  const seen = new Set();
+  rows.forEach(r => {
+    const dt = parseDT(r.ActualScanDate);
+    if (!dt) return;
+    if (!(r.PartScanStatus === 'True' || r.PartScanStatus === true || r.PartScanStatus === 'TRUE')) return;
+    const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+    const mins = dt.getHours()*60 + dt.getMinutes();
+    // On dateStr: count scans >= 6AM
+    if (rowDate === dateStr && mins >= 360) seen.add(+r.BlendNumber||0);
+    // On nextDateStr: count scans < 6AM
+    if (rowDate === nextDateStr && mins < 360) seen.add(+r.BlendNumber||0);
+  });
+  return seen.size;
+}
+
+// Same set for P703 ISO format
+function getLastNDatesP3(rows, n) {
+  const dateSet = new Set();
+  rows.forEach(r => {
+    const dt = parseDT(r.ActualScanDate || r['Actual Scan Date']);
+    if (!dt) return;
+    const ds = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+    dateSet.add(ds);
+  });
+  const sorted = [...dateSet].sort((a,b) => parseDate(b) - parseDate(a));
+  return sorted.slice(0, n).reverse();
+}
+
+function findShiftStartP3(rows, dateStr) {
+  const TARGET = 6*60, WINDOW_MIN = 4*60, WINDOW_MAX = 8*60;
+  const dayRows = [];
+  rows.forEach(r => {
+    const dt = parseDT(r.ActualScanDate || r['Actual Scan Date']);
+    if (!dt) return;
+    const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+    if (rowDate !== dateStr) return;
+    const bs = r.BuildStatus||'';
+    if (bs !== 'Built, Shipped' && bs !== 'Built, Not Shipped') return;
+    dayRows.push({ dt, blend: +r['Blend No']||0, rack: r['Rack ID'], mins: dt.getHours()*60+dt.getMinutes() });
+  });
+  if (!dayRows.length) return null;
+  const window = dayRows.filter(r => r.mins >= WINDOW_MIN && r.mins <= WINDOW_MAX);
+  const pool = window.length ? window : dayRows;
+  pool.sort((a,b) => Math.abs(a.mins - TARGET) - Math.abs(b.mins - TARGET));
+  return { blend: pool[0].blend, rack: pool[0].rack, time: pool[0].dt };
+}
+
+function findShiftCloseP3(rows, nextDateStr) {
+  const CUTOFF = 6*60;
+  const dayRows = [];
+  rows.forEach(r => {
+    const dt = parseDT(r.ActualScanDate || r['Actual Scan Date']);
+    if (!dt) return;
+    const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+    if (rowDate !== nextDateStr) return;
+    const bs = r.BuildStatus||'';
+    if (bs !== 'Built, Shipped' && bs !== 'Built, Not Shipped') return;
+    const mins = dt.getHours()*60 + dt.getMinutes();
+    if (mins >= CUTOFF) return;
+    dayRows.push({ dt, blend: +r['Blend No']||0, rack: r['Rack ID'], mins });
+  });
+  if (!dayRows.length) return null;
+  dayRows.sort((a,b) => b.dt - a.dt);
+  return { blend: dayRows[0].blend, rack: dayRows[0].rack, time: dayRows[0].dt };
+}
+
+function countYesterdayProductionP3(rows, dateStr, nextDateStr) {
+  const seen = new Set();
+  rows.forEach(r => {
+    const dt = parseDT(r.ActualScanDate || r['Actual Scan Date']);
+    if (!dt) return;
+    const bs = r.BuildStatus||'';
+    if (bs !== 'Built, Shipped' && bs !== 'Built, Not Shipped') return;
+    const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+    const mins = dt.getHours()*60 + dt.getMinutes();
+    if (rowDate === dateStr    && mins >= 360) seen.add(+r['Blend No']||0);
+    if (rowDate === nextDateStr && mins <  360) seen.add(+r['Blend No']||0);
+  });
+  return seen.size;
+}
+
+// Collect all unique scan dates across all loaded sources and populate the picker
+function bufRefreshDates() {
+  const allRows = [...p7rows1, ...p7rows2, ...u6rows, ...p3ccRows, ...p3tfpRows];
+  const dateSet = new Set();
+  allRows.forEach(r => {
+    const dt = parseDT(r.ActualScanDate || r['Actual Scan Date']);
+    if (!dt) return;
+    dateSet.add(`${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`);
+  });
+  const sorted = [...dateSet].sort((a,b) => parseDate(b) - parseDate(a));
+  const sel = document.getElementById('buf-date-sel');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— select date —</option>';
+  sorted.forEach(ds => {
+    const opt = document.createElement('option');
+    opt.value = ds;
+    const d = parseDate(ds);
+    opt.textContent = `${ds}  ${d ? DAYS_S[d.getDay()] : ''}`;
+    sel.appendChild(opt);
+  });
+  if (prev && sorted.includes(prev)) { sel.value = prev; bufSelDate = prev; }
+  else if (sorted.length) { sel.value = sorted[0]; bufSelDate = sorted[0]; }
 }
 
 // Save / restore customer inputs so they survive re-renders
@@ -1408,146 +1517,158 @@ function bufSaveInputs() {
 }
 
 function bufRender() {
-  // Collect any existing input values before re-render
   bufSaveInputs();
-
   const content = document.getElementById('buf-content');
-  const allP702 = [...p7rows1, ...p7rows2];
-  // Include P703 rows in the "has data" check
-  const allRows = [...allP702, ...u6rows, ...p3ccRows, ...p3tfpRows];
+  const allRows = [...p7rows1, ...p7rows2, ...u6rows, ...p3ccRows, ...p3tfpRows];
 
   if (!allRows.length) {
     content.innerHTML = `<div class="placeholder" style="padding:40px"><div style="font-size:28px;margin-bottom:10px">📊</div><div style="font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:5px">No data yet</div><div>Upload files on the P702, P703, and U6XX tabs first</div></div>`;
     return;
   }
 
-  // Group lines by group label
+  // Populate picker if empty
+  const sel = document.getElementById('buf-date-sel');
+  if (sel.options.length <= 1) bufRefreshDates();
+  bufSelDate = sel.value;
+
+  if (!bufSelDate) {
+    content.innerHTML = `<div class="placeholder" style="padding:40px"><div style="font-size:24px;margin-bottom:10px">📅</div><div style="font-size:13px;font-weight:600;color:var(--txt2)">Select a production date above</div></div>`;
+    return;
+  }
+
+  const ds = bufSelDate;
+  const dtObj = parseDate(ds);
+  const dayName = dtObj ? DAYS_S[dtObj.getDay()] : '';
+
+  // Find next date across ALL sources
+  const allDateSet = new Set();
+  allRows.forEach(r => {
+    const dt = parseDT(r.ActualScanDate || r['Actual Scan Date']);
+    if (!dt) return;
+    allDateSet.add(`${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`);
+  });
+  const allDatesSorted = [...allDateSet].sort((a,b) => parseDate(a) - parseDate(b));
+  const dsIdx = allDatesSorted.indexOf(ds);
+  const nextDs = dsIdx >= 0 && dsIdx < allDatesSorted.length - 1 ? allDatesSorted[dsIdx + 1] : null;
+
+  // Group lines
   const groups = {};
   BUF_LINES.forEach(line => {
     if (!groups[line.group]) groups[line.group] = [];
     groups[line.group].push(line);
   });
 
-  let html = '';
-  Object.entries(groups).forEach(([groupName, lines]) => {
-    html += `<div class="buf-section"><div class="buf-section-lbl">${groupName}</div><div class="buf-grid">`;
+  // Group pill colors
+  const groupPillColor = {
+    'DTP — AP05A':  'var(--dtp)',
+    'KCAP — AP06A': 'var(--kcap)',
+    'U6XX — AP03A': 'var(--u6xx)',
+    'P703 — AP02A': 'var(--p703)',
+  };
 
+  let html = `<div style="padding:0 0 12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="font-size:14px;font-weight:700">${ds} &nbsp;<span style="font-size:12px;color:var(--txt3);font-family:'DM Mono',monospace">${dayName}</span></div>
+    ${nextDs
+      ? `<div style="font-size:11px;color:var(--txt3)">Next day: <span style="color:var(--txt2);font-family:'DM Mono',monospace">${nextDs}</span></div>`
+      : `<div style="font-size:11px;color:var(--amber);font-weight:600">⚠ No next-day data yet — Last Blend &amp; Yesterday Production will populate when next day uploads</div>`
+    }
+  </div>`;
+
+  Object.entries(groups).forEach(([groupName, lines]) => {
+    const pillColor = groupPillColor[groupName] || 'var(--blue)';
+
+    // Build one row per line
+    let tbodyHtml = '';
     lines.forEach(line => {
-      const rows = bufGetRows(line.rg, line.src);
+      const rows  = bufGetRows(line.rg, line.src);
       const isP703 = line.src === 'p703cc' || line.src === 'p703tfp';
 
-      let tableRows = '';
       if (!rows.length) {
-        tableRows = `<tr><td class="lft" colspan="7" style="padding:14px;color:var(--txt3)">No data — upload the relevant file</td></tr>`;
-      } else if (isP703) {
-        // ── P703 BUFFER: single row — highest Built, Not Shipped blend across entire file
-        const bnsRows = rows.filter(r => r.BuildStatus === 'Built, Not Shipped');
+        tbodyHtml += `<tr>
+          <td class="td-line">${line.label}<span>${line.rg}</span></td>
+          <td colspan="5" class="buf-na-cell" style="font-style:italic">No data — upload the relevant file</td>
+        </tr>`;
+        return;
+      }
 
-        if (!bnsRows.length) {
-          const shipped = rows.filter(r => r.BuildStatus === 'Built, Shipped');
-          const maxBlend = shipped.length ? Math.max(...shipped.map(r=>+r['Blend No']||0)) : null;
-          tableRows = `<tr><td class="lft" colspan="7" style="padding:14px;color:var(--txt3)">No Built/Not Shipped records. Last shipped blend: <b>${maxBlend ?? '—'}</b></td></tr>`;
-        } else {
-          // Find the single row with the highest blend number
-          const best = bnsRows.reduce((top, r) => (+r['Blend No']||0) > (+top['Blend No']||0) ? r : top, bnsRows[0]);
-          const ourBlend = +best['Blend No'] || 0;
-          const ourRack  = best.RackID;
-          const key      = `${line.rg}|current`;
-          const custVal  = bufCustInputs[key] || '';
+      const opener  = isP703 ? findShiftStartP3(rows, ds) : findShiftStart(rows, ds);
+      const closer  = nextDs ? (isP703 ? findShiftCloseP3(rows, nextDs) : findShiftClose(rows, nextDs)) : null;
+      const prodCnt = (opener && nextDs)
+        ? (isP703 ? countYesterdayProductionP3(rows, ds, nextDs) : countYesterdayProduction(rows, ds, nextDs))
+        : null;
 
-          let bufHtml = `<span class="buf-na">—</span>`;
-          let howHtml = `<span style="color:var(--txt3);font-size:10px">Enter customer blend</span>`;
-          if (custVal) {
-            const custNum = parseInt(custVal.replace(/,/g, ''), 10);
-            if (!isNaN(custNum)) {
-              const diff = ourBlend - custNum;
-              const cls  = diff > 0 ? 'buf-pos' : diff < 0 ? 'buf-neg' : 'buf-zero';
-              const sign = diff > 0 ? '+' : '';
-              bufHtml = `<span class="${cls}">${sign}${diff.toLocaleString()}</span>`;
-              howHtml = `<span style="font-size:10px;color:var(--txt3)">${ourBlend.toLocaleString()} − ${custNum.toLocaleString()}</span>`;
-            }
-          }
-          tableRows = `<tr>
-            <td class="t-date" colspan="2" style="color:var(--txt2);font-family:'DM Sans',sans-serif;font-size:12px">Current</td>
-            <td class="t-time" style="color:var(--txt3);font-size:10px">Highest BNS</td>
-            <td class="t-our">${ourBlend}<span class="buf-rack">${ourRack ? 'Rack '+Math.round(+ourRack) : ''}</span></td>
-            <td class="t-cust"><input type="number" class="buf-cust-input" data-key="${key}" data-our="${ourBlend}" placeholder="Enter blend #" value="${custVal}" onchange="bufOnChange(this)" oninput="bufOnChange(this)"></td>
-            <td class="t-buf">${bufHtml}</td>
-            <td class="t-how">${howHtml}</td>
-          </tr>`;
-        }
-      } else {
-        // ── Standard lines: use 6AM scan timestamp
-        const dates = getLastNDates(rows, 3);
-        if (!dates.length) {
-          tableRows = `<tr><td class="lft" colspan="7" style="padding:14px;color:var(--txt3)">No ActualScanDate records found</td></tr>`;
-        } else {
-          dates.forEach(ds => {
-            const result  = findShiftStart(rows, ds);
-            const key     = `${line.rg}|${ds}`;
-            const custVal = bufCustInputs[key] || '';
-            const dtObj   = parseDate(ds);
-            const dayName = dtObj ? DAYS_S[dtObj.getDay()] : '';
+      const key     = `${line.rg}|${ds}`;
+      const custVal = bufCustInputs[key] || '';
+      const ourBlend = opener ? opener.blend : null;
 
-            let bufHtml = `<span class="buf-na">—</span>`;
-            let howHtml = `<span style="color:var(--txt3);font-size:10px">Enter customer blend</span>`;
-            if (result && custVal) {
-              const custNum = parseInt(custVal.replace(/,/g, ''), 10);
-              if (!isNaN(custNum)) {
-                const diff = result.blend - custNum;
-                const cls  = diff > 0 ? 'buf-pos' : diff < 0 ? 'buf-neg' : 'buf-zero';
-                const sign = diff > 0 ? '+' : '';
-                bufHtml = `<span class="${cls}">${sign}${diff.toLocaleString()}</span>`;
-                howHtml = `<span style="font-size:10px;color:var(--txt3)">${result.blend} − ${custNum.toLocaleString()}</span>`;
-              }
-            }
-            const ourBlend = result ? result.blend : null;
-            const ourRack  = result ? result.rack  : null;
-            const ourTime  = result ? fmtDT(result.time) : '—';
-            tableRows += `<tr>
-              <td class="t-date">${ds}</td>
-              <td class="t-day">${dayName}</td>
-              <td class="t-time">${ourTime}</td>
-              <td class="t-our">${ourBlend ?? '—'}<span class="buf-rack">${ourRack ? 'Rack ' + Math.round(ourRack) : ''}</span></td>
-              <td class="t-cust"><input type="number" class="buf-cust-input" data-key="${key}" data-our="${ourBlend ?? ''}" placeholder="Enter blend #" value="${custVal}" onchange="bufOnChange(this)" oninput="bufOnChange(this)"></td>
-              <td class="t-buf">${bufHtml}</td>
-              <td class="t-how">${howHtml}</td>
-            </tr>`;
-          });
+      let bufVal = '', bufCls = '', calcTxt = '';
+      if (ourBlend && custVal) {
+        const custNum = parseInt(custVal.replace(/,/g,''), 10);
+        if (!isNaN(custNum)) {
+          const diff = ourBlend - custNum;
+          bufCls = diff > 0 ? 'buf-pos' : diff < 0 ? 'buf-neg' : 'buf-zero';
+          bufVal = (diff > 0 ? '+' : '') + diff.toLocaleString();
+          calcTxt = `${ourBlend} − ${custNum.toLocaleString()}`;
         }
       }
 
-      // Column header differs for P703 (no scan time, shows "Max BNS Blend")
-      const scanColLabel = isP703 ? 'Method' : 'Scan Time';
-      const ourColLabel  = isP703 ? 'Highest Built/NSh Blend' : 'Our Blend @ 6AM';
-      const noteText = isP703
-        ? `<b>P703 Buffer:</b> "Our Blend" = single highest <em>Built, Not Shipped</em> blend across the entire file — this is the furthest unit built and ready to ship. &nbsp;·&nbsp; <span style="color:var(--green)">Positive = ahead of customer</span> &nbsp; <span style="color:var(--red)">Negative = behind</span>`
-        : `<b>Buffer = Our Blend − Customer Blend</b> &nbsp;·&nbsp; Blend numbers are Ford vehicle sequence numbers &nbsp;·&nbsp; <span style="color:var(--green)">Positive = ahead</span> &nbsp; <span style="color:var(--red)">Negative = behind</span>`;
+      const openerCell = opener
+        ? `<div class="buf-blend-val">${opener.blend}</div>
+           <div class="buf-blend-sub">Rack ${Math.round(+opener.rack||0)}</div>
+           <div class="buf-blend-time">${fmtDT(opener.time)}</div>`
+        : `<div class="buf-na-cell">No scan near 6 AM</div>`;
 
-      html += `<div class="buf-card">
-        <div class="buf-card-hdr ${line.groupCls}">
-          <div class="buf-card-name">${line.label}</div>
-          <div class="buf-card-tag">${line.rg}</div>
-        </div>
-        <div class="buf-table-wrap">
-          <table class="buf-table">
-            <thead><tr>
-              <th class="c-date">Date</th>
-              <th class="c-day">Day</th>
-              <th class="c-time">${scanColLabel}</th>
-              <th class="c-our">${ourColLabel}</th>
-              <th class="c-cust">Customer Blend @ 6AM</th>
-              <th class="c-buf">Buffer</th>
-              <th class="c-calc">Calculation</th>
-            </tr></thead>
-            <tbody>${tableRows}</tbody>
-          </table>
-        </div>
-        <div class="buf-calc-note">${noteText}</div>
-      </div>`;
+      const closerCell = closer
+        ? `<div class="buf-close-val">${closer.blend}</div>
+           <div class="buf-blend-sub">Rack ${Math.round(+closer.rack||0)}</div>
+           <div class="buf-blend-time">${fmtDT(closer.time)}</div>`
+        : `<div class="buf-na-cell">${nextDs ? '—' : 'Awaiting next day'}</div>`;
+
+      const prodCell = prodCnt != null
+        ? `<div class="buf-prod-val">${prodCnt}</div><div class="buf-prod-sub">blends</div>`
+        : `<div class="buf-na-cell">${nextDs ? '—' : 'Awaiting next day'}</div>`;
+
+      tbodyHtml += `<tr>
+        <td class="td-line">${line.label}<span>${line.rg}</span></td>
+        <td class="td-blend">${openerCell}</td>
+        <td class="td-blend">${closerCell}</td>
+        <td class="td-blend">${prodCell}</td>
+        <td class="td-cust">
+          <input type="number" class="buf-cust-input"
+            data-key="${key}" data-our="${ourBlend??''}"
+            placeholder="Enter blend #" value="${custVal}"
+            onchange="bufOnChange(this)" oninput="bufOnChange(this)">
+        </td>
+        <td>
+          <div class="buf-result-val ${bufCls}" data-buf-val>${bufVal || '<span class="buf-na">—</span>'}</div>
+          <div class="buf-calc-sub" data-calc-txt>${calcTxt || ''}</div>
+        </td>
+      </tr>`;
     });
 
-    html += `</div></div>`;
+    html += `<div class="buf-table-outer">
+      <div class="buf-group-hdr">
+        <div class="buf-group-pill" style="background:${pillColor}">${groupName}</div>
+      </div>
+      <table class="buf-tbl">
+        <thead><tr>
+          <th>Line</th>
+          <th>6 AM Blend (Shift Open)</th>
+          <th>Last Blend before 6 AM</th>
+          <th>Yesterday Production</th>
+          <th>Customer @ 6 AM</th>
+          <th>Buffer</th>
+        </tr></thead>
+        <tbody>${tbodyHtml}</tbody>
+      </table>
+      <div class="buf-table-note">
+        <b>6 AM Blend</b> = first scan ≥ 6:00 AM &nbsp;·&nbsp;
+        <b>Last Blend before 6 AM</b> = last scan before 6:00 AM next day &nbsp;·&nbsp;
+        <b>Yesterday Production</b> = distinct blends between those two &nbsp;·&nbsp;
+        <span style="color:var(--green)">Positive = ahead of customer</span> &nbsp;
+        <span style="color:var(--red)">Negative = behind</span>
+      </div>
+    </div>`;
   });
 
   content.innerHTML = html;
@@ -1561,23 +1682,21 @@ function bufOnChange(inp) {
 
   const row = inp.closest('tr');
   if (!row) return;
-  const bufCell = row.querySelector('.t-buf');
-  const howCell = row.querySelector('.t-how');
-
-  // Our blend is stored in data-our on the input
-  const ourBlend = parseInt(inp.dataset.our, 10);
+  const bufValEl  = row.querySelector('[data-buf-val]');
+  const calcTxtEl = row.querySelector('[data-calc-txt]');
+  const ourBlend  = parseInt(inp.dataset.our, 10);
   const custBlend = parseInt(val.replace(/,/g,''), 10);
 
   if (!val || isNaN(custBlend) || isNaN(ourBlend)) {
-    if (bufCell) bufCell.innerHTML = `<span class="buf-na">—</span>`;
-    if (howCell) howCell.innerHTML = `<span style="color:var(--txt3);font-size:10px">Enter customer blend</span>`;
+    if (bufValEl)  { bufValEl.className = 'buf-result-val'; bufValEl.innerHTML = `<span class="buf-na">—</span>`; }
+    if (calcTxtEl) calcTxtEl.textContent = '';
     return;
   }
   const diff = ourBlend - custBlend;
   const cls  = diff > 0 ? 'buf-pos' : diff < 0 ? 'buf-neg' : 'buf-zero';
   const sign = diff > 0 ? '+' : '';
-  if (bufCell) bufCell.innerHTML = `<span class="${cls}">${sign}${diff.toLocaleString()}</span>`;
-  if (howCell) howCell.innerHTML = `<span style="font-size:10px;color:var(--txt3)">${ourBlend.toLocaleString()} − ${custBlend.toLocaleString()}</span>`;
+  if (bufValEl)  { bufValEl.className = `buf-result-val ${cls}`; bufValEl.textContent = `${sign}${diff.toLocaleString()}`; }
+  if (calcTxtEl) calcTxtEl.textContent = `${ourBlend.toLocaleString()} − ${custBlend.toLocaleString()}`;
 }
 </script>
 </body>
