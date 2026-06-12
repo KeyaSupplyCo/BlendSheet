@@ -215,8 +215,12 @@ tbody tr.tr-tot td.lft{color:var(--txt);font-size:10px;font-family:'DM Mono',mon
 .buf-group-hdr{padding:9px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surf2);}
 .buf-group-pill{padding:2px 12px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;}
 .buf-tbl{width:100%;border-collapse:collapse;font-size:12px;}
-.buf-tbl thead th{padding:8px 14px;text-align:left;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);background:var(--surf2);border-bottom:1px solid var(--border);white-space:nowrap;}
-.buf-tbl tbody td{padding:10px 14px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+.buf-tbl thead th{padding:8px 14px;text-align:center;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);background:var(--surf2);border-bottom:2px solid var(--border);border-right:1px solid var(--border);white-space:nowrap;}
+.buf-tbl thead th:first-child{text-align:left;border-left:none;}
+.buf-tbl thead th:last-child{border-right:none;}
+.buf-tbl tbody td{padding:10px 14px;border-bottom:1px solid var(--border);border-right:1px solid #f1f5f9;vertical-align:middle;text-align:center;}
+.buf-tbl tbody td:first-child{text-align:left;border-left:none;}
+.buf-tbl tbody td:last-child{border-right:none;}
 .buf-tbl tbody tr:last-child td{border-bottom:none;}
 .buf-tbl tbody tr:hover{background:#f8fafc;}
 .buf-tbl td.td-line{font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap;min-width:110px;}
@@ -454,6 +458,13 @@ tbody tr.tr-tot td.lft{color:var(--txt);font-size:10px;font-family:'DM Mono',mon
   <div style="padding:0 28px 6px">
     <div class="buf-note">
       <b>Yesterday's Production</b> = first blend scanned at or after 6:00 AM on selected date → last blend scanned before 6:00 AM the next day. Count between those two = shift output. Enter the customer's 6 AM blend to calculate your buffer.
+    </div>
+    <div style="padding:4px 0 8px;font-size:11px;color:var(--txt3)">
+      <b style="color:var(--txt2)">6 AM Blend</b> = first scan ≥ 6:00 AM &nbsp;·&nbsp;
+      <b style="color:var(--txt2)">Last Blend before 6 AM</b> = last scan before 6:00 AM next day (or last scan of day for day-shift lines) &nbsp;·&nbsp;
+      <b style="color:var(--txt2)">Yesterday Production</b> = distinct blends between those two &nbsp;·&nbsp;
+      <span style="color:var(--green);font-weight:600">Positive = ahead of customer</span> &nbsp;
+      <span style="color:var(--red);font-weight:600">Negative = behind</span>
     </div>
   </div>
   <div id="buf-content" style="padding:0 28px 40px">
@@ -1378,9 +1389,9 @@ function findShiftStart(rows, dateStr) {
 
 // Find the last scan BEFORE 6:00 AM on nextDateStr (the shift closer for dateStr's shift)
 // = last blend of the night, before the 6AM handoff on the following day
-function findShiftClose(rows, nextDateStr) {
-  const CUTOFF = 6 * 60; // 6:00 AM
-  const dayRows = [];
+function findShiftClose(rows, nextDateStr, dateStr) {
+  const CUTOFF = 6 * 60;
+  const nextDayRows = [];
   rows.forEach(r => {
     const dt = parseDT(r.ActualScanDate);
     if (!dt) return;
@@ -1388,31 +1399,54 @@ function findShiftClose(rows, nextDateStr) {
     if (rowDate !== nextDateStr) return;
     if (!(r.PartScanStatus === 'True' || r.PartScanStatus === true || r.PartScanStatus === 'TRUE')) return;
     const mins = dt.getHours()*60 + dt.getMinutes();
-    if (mins >= CUTOFF) return; // only before 6AM
-    dayRows.push({ dt, blend: +r.BlendNumber||0, rack: r.RackID, mins });
+    if (mins >= CUTOFF) return;
+    nextDayRows.push({ dt, blend: +r.BlendNumber||0, rack: r.RackID, mins });
   });
-  if (!dayRows.length) return null;
-  dayRows.sort((a,b) => b.dt - a.dt); // latest first
-  return { blend: dayRows[0].blend, rack: dayRows[0].rack, time: dayRows[0].dt };
+  if (nextDayRows.length) {
+    nextDayRows.sort((a,b) => b.dt - a.dt);
+    return { blend: nextDayRows[0].blend, rack: nextDayRows[0].rack, time: nextDayRows[0].dt };
+  }
+  // Fallback: last scan of dateStr (day-shift lines have no pre-6AM scans next day)
+  if (dateStr) {
+    const currDayRows = [];
+    rows.forEach(r => {
+      const dt = parseDT(r.ActualScanDate);
+      if (!dt) return;
+      const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+      if (rowDate !== dateStr) return;
+      if (!(r.PartScanStatus === 'True' || r.PartScanStatus === true || r.PartScanStatus === 'TRUE')) return;
+      currDayRows.push({ dt, blend: +r.BlendNumber||0, rack: r.RackID });
+    });
+    if (currDayRows.length) {
+      currDayRows.sort((a,b) => b.dt - a.dt);
+      return { blend: currDayRows[0].blend, rack: currDayRows[0].rack, time: currDayRows[0].dt, fallback: true };
+    }
+  }
+  return null;
 }
 
-// Count distinct blends scanned in the shift window:
-// from opener (first scan >= 6AM on dateStr) to closer (last scan < 6AM on nextDateStr)
-// Both endpoints inclusive
+// Count distinct blends in the shift window:
+// If the line runs night shifts: from 6AM on dateStr + pre-6AM scans on nextDateStr
+// If day-shift only (no pre-6AM scans on nextDateStr): count all scans >= 6AM on dateStr
 function countYesterdayProduction(rows, dateStr, nextDateStr) {
-  // Collect all scanned blends from 6AM on dateStr through end of dateStr
-  // PLUS all blends before 6AM on nextDateStr
+  const isScanned = r => r.PartScanStatus === 'True' || r.PartScanStatus === true || r.PartScanStatus === 'TRUE';
+  // Check if any pre-6AM scans exist on nextDateStr
+  const hasNightScans = rows.some(r => {
+    const dt = parseDT(r.ActualScanDate);
+    if (!dt || !isScanned(r)) return false;
+    const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+    return rowDate === nextDateStr && dt.getHours()*60 + dt.getMinutes() < 360;
+  });
   const seen = new Set();
   rows.forEach(r => {
     const dt = parseDT(r.ActualScanDate);
-    if (!dt) return;
-    if (!(r.PartScanStatus === 'True' || r.PartScanStatus === true || r.PartScanStatus === 'TRUE')) return;
+    if (!dt || !isScanned(r)) return;
     const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
     const mins = dt.getHours()*60 + dt.getMinutes();
-    // On dateStr: count scans >= 6AM
+    // Always count scans >= 6AM on dateStr
     if (rowDate === dateStr && mins >= 360) seen.add(+r.BlendNumber||0);
-    // On nextDateStr: count scans < 6AM
-    if (rowDate === nextDateStr && mins < 360) seen.add(+r.BlendNumber||0);
+    // Only add next-day pre-6AM scans if night-shift scans exist
+    if (hasNightScans && rowDate === nextDateStr && mins < 360) seen.add(+r.BlendNumber||0);
   });
   return seen.size;
 }
@@ -1449,9 +1483,9 @@ function findShiftStartP3(rows, dateStr) {
   return { blend: pool[0].blend, rack: pool[0].rack, time: pool[0].dt };
 }
 
-function findShiftCloseP3(rows, nextDateStr) {
+function findShiftCloseP3(rows, nextDateStr, dateStr) {
   const CUTOFF = 6*60;
-  const dayRows = [];
+  const nextDayRows = [];
   rows.forEach(r => {
     const dt = parseDT(r.ActualScanDate || r['Actual Scan Date']);
     if (!dt) return;
@@ -1461,15 +1495,42 @@ function findShiftCloseP3(rows, nextDateStr) {
     if (bs !== 'Built, Shipped' && bs !== 'Built, Not Shipped') return;
     const mins = dt.getHours()*60 + dt.getMinutes();
     if (mins >= CUTOFF) return;
-    dayRows.push({ dt, blend: +r['Blend No']||0, rack: r['Rack ID'], mins });
+    nextDayRows.push({ dt, blend: +r['Blend No']||0, rack: r['Rack ID'], mins });
   });
-  if (!dayRows.length) return null;
-  dayRows.sort((a,b) => b.dt - a.dt);
-  return { blend: dayRows[0].blend, rack: dayRows[0].rack, time: dayRows[0].dt };
+  if (nextDayRows.length) {
+    nextDayRows.sort((a,b) => b.dt - a.dt);
+    return { blend: nextDayRows[0].blend, rack: nextDayRows[0].rack, time: nextDayRows[0].dt };
+  }
+  // Fallback: last scan of dateStr
+  if (dateStr) {
+    const currDayRows = [];
+    rows.forEach(r => {
+      const dt = parseDT(r.ActualScanDate || r['Actual Scan Date']);
+      if (!dt) return;
+      const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+      if (rowDate !== dateStr) return;
+      const bs = r.BuildStatus||'';
+      if (bs !== 'Built, Shipped' && bs !== 'Built, Not Shipped') return;
+      currDayRows.push({ dt, blend: +r['Blend No']||0, rack: r['Rack ID'] });
+    });
+    if (currDayRows.length) {
+      currDayRows.sort((a,b) => b.dt - a.dt);
+      return { blend: currDayRows[0].blend, rack: currDayRows[0].rack, time: currDayRows[0].dt, fallback: true };
+    }
+  }
+  return null;
 }
 
 function countYesterdayProductionP3(rows, dateStr, nextDateStr) {
   const seen = new Set();
+  // Check if any pre-6AM scans exist on nextDateStr
+  const hasNightScans = rows.some(r => {
+    const dt = parseDT(r.ActualScanDate || r['Actual Scan Date']);
+    if (!dt) return false;
+    const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
+    return rowDate === nextDateStr && dt.getHours()*60+dt.getMinutes() < 360 &&
+      (r.BuildStatus === 'Built, Shipped' || r.BuildStatus === 'Built, Not Shipped');
+  });
   rows.forEach(r => {
     const dt = parseDT(r.ActualScanDate || r['Actual Scan Date']);
     if (!dt) return;
@@ -1477,8 +1538,9 @@ function countYesterdayProductionP3(rows, dateStr, nextDateStr) {
     if (bs !== 'Built, Shipped' && bs !== 'Built, Not Shipped') return;
     const rowDate = `${dt.getMonth()+1}/${dt.getDate()}/${dt.getFullYear()}`;
     const mins = dt.getHours()*60 + dt.getMinutes();
-    if (rowDate === dateStr    && mins >= 360) seen.add(+r['Blend No']||0);
-    if (rowDate === nextDateStr && mins <  360) seen.add(+r['Blend No']||0);
+    if (rowDate === dateStr && mins >= 360) seen.add(+r['Blend No']||0);
+    if (hasNightScans && rowDate === nextDateStr && mins < 360) seen.add(+r['Blend No']||0);
+    // If no night scans: entire dateStr day counts (already added above via >= 360)
   });
   return seen.size;
 }
@@ -1592,7 +1654,7 @@ function bufRender() {
       }
 
       const opener  = isP703 ? findShiftStartP3(rows, ds) : findShiftStart(rows, ds);
-      const closer  = nextDs ? (isP703 ? findShiftCloseP3(rows, nextDs) : findShiftClose(rows, nextDs)) : null;
+      const closer  = nextDs ? (isP703 ? findShiftCloseP3(rows, nextDs, ds) : findShiftClose(rows, nextDs, ds)) : null;
       const prodCnt = (opener && nextDs)
         ? (isP703 ? countYesterdayProductionP3(rows, ds, nextDs) : countYesterdayProduction(rows, ds, nextDs))
         : null;
@@ -1661,13 +1723,6 @@ function bufRender() {
         </tr></thead>
         <tbody>${tbodyHtml}</tbody>
       </table>
-      <div class="buf-table-note">
-        <b>6 AM Blend</b> = first scan ≥ 6:00 AM &nbsp;·&nbsp;
-        <b>Last Blend before 6 AM</b> = last scan before 6:00 AM next day &nbsp;·&nbsp;
-        <b>Yesterday Production</b> = distinct blends between those two &nbsp;·&nbsp;
-        <span style="color:var(--green)">Positive = ahead of customer</span> &nbsp;
-        <span style="color:var(--red)">Negative = behind</span>
-      </div>
     </div>`;
   });
 
