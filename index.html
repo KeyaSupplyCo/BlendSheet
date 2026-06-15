@@ -641,15 +641,23 @@ function buildTruckPlan(rows2, cfg, title){
     .filter(r=>ccByRack[r] && ccByRack[r].min > lsCC_blend)
     .sort((a,b)=>ccByRack[a].min - ccByRack[b].min);
 
-  // LHD/RHD: min blend per rack (for unambiguous assignment)
-  function minBlendByRack(sub){
+  // LHD/RHD: min AND max blend per rack
+  function blendRangeByRack(sub){
     const m={};
     sub.forEach(r=>{const rack=+r.RackID||0,b=+r.BlendNumber||0;
-      if(!(rack in m)||b<m[rack])m[rack]=b;});
+      if(!m[rack])m[rack]={min:b,max:b};
+      else{m[rack].min=Math.min(m[rack].min,b);m[rack].max=Math.max(m[rack].max,b);}
+    });
     return m;
   }
-  const lhdMinBlend=minBlendByRack(lhd);
-  const rhdMinBlend=minBlendByRack(rhd);
+  const lhdBlendByRack=blendRangeByRack(lhd);
+  const rhdBlendByRack=blendRangeByRack(rhd);
+  // Min blend lookups (used for assignment)
+  const lhdMinBlend=Object.fromEntries(Object.entries(lhdBlendByRack).map(([k,v])=>[k,v.min]));
+  const rhdMinBlend=Object.fromEntries(Object.entries(rhdBlendByRack).map(([k,v])=>[k,v.min]));
+  // Max blend lookups (used for status — rack is built when max blend <= lastBuilt)
+  const lhdMaxBlend=Object.fromEntries(Object.entries(lhdBlendByRack).map(([k,v])=>[k,v.max]));
+  const rhdMaxBlend=Object.fromEntries(Object.entries(rhdBlendByRack).map(([k,v])=>[k,v.max]));
 
   // Unshipped LHD/RHD racks: filter by min blend > last shipped blend, sort by min blend
   const lhdUnshipped=[...new Set(lhd.map(r=>+r.RackID||0))]
@@ -659,10 +667,11 @@ function buildTruckPlan(rows2, cfg, title){
     .filter(r=>rhdMinBlend[r]!==undefined && rhdMinBlend[r]>lsRHD_blend)
     .sort((a,b)=>rhdMinBlend[a]-rhdMinBlend[b]);
 
-  // Truck status: compare min blend of each rack against last BUILT blend (handles rack reset)
-  function tStatus(racks,lastBuiltBlend,minBlendLookup){
+  // Truck status: a rack is fully built when its MAX blend <= lastBuiltBlend
+  // (min blend only tells you where it starts, max tells you all parts are done)
+  function tStatus(racks,lastBuiltBlend,maxBlendLookup){
     if(!racks.length)return'pending';
-    const done=racks.filter(r=>(minBlendLookup[r]||Infinity)<=lastBuiltBlend).length;
+    const done=racks.filter(r=>(maxBlendLookup[r]||Infinity)<=lastBuiltBlend).length;
     if(done===racks.length)return'built';
     if(done>0)return'partial';
     return'pending';
@@ -685,8 +694,10 @@ function buildTruckPlan(rows2, cfg, title){
     const tLHD=lhdUnshipped.filter(r=>lhdMinBlend[r]>=bMin && lhdMinBlend[r]<=bMax);
     const tRHD=rhdUnshipped.filter(r=>rhdMinBlend[r]>=bMin && rhdMinBlend[r]<=bMax);
 
-    // determine overall truck status using blend numbers
-    const ccSt=tStatus(tCC,lcCC_blend,ccByRack), lhdSt=tStatus(tLHD,lcLHD_blend,lhdMinBlend), rhdSt=tStatus(tRHD,lcRHD_blend,rhdMinBlend);
+    // determine overall truck status using blend numbers — a rack is done when its MAX blend <= lastBuilt
+    const ccSt=tStatus(tCC,lcCC_blend,Object.fromEntries(Object.entries(ccByRack).map(([k,v])=>[k,v.max])));
+    const lhdSt=tStatus(tLHD,lcLHD_blend,lhdMaxBlend);
+    const rhdSt=tStatus(tRHD,lcRHD_blend,rhdMaxBlend);
     const order={built:2,partial:1,pending:0};
     const overall=[ccSt,lhdSt,rhdSt].reduce((w,s)=>order[s]<order[w]?s:w,'built');
 
@@ -1138,14 +1149,17 @@ function buildP703TruckPlan(ccRows, tfpRows) {
     const bMax = Math.max(...tCC.map(r=>ccByRack[r]?ccByRack[r].max:-Infinity));
     // TFP racks assigned by min blend (no overlap)
     const tTFP = tfpUnshipped.filter(rk => tfpMinBlend[rk] >= bMin && tfpMinBlend[rk] <= bMax);
-    // Status per group — compare min blend of rack against last built blend
-    function tStatus(racks, lastBuiltBlend, minBlendLookup) {
+    // Status: a rack is done when its MAX blend <= lastBuiltBlend
+    function tStatus(racks, lastBuiltBlend, maxBlendLookup) {
       if (!racks.length) return 'pending';
-      const done = racks.filter(r=>(minBlendLookup[r]||Infinity)<=lastBuiltBlend).length;
+      const done = racks.filter(r=>(maxBlendLookup[r]||Infinity)<=lastBuiltBlend).length;
       if (done===racks.length) return 'built'; if (done>0) return 'partial'; return 'pending';
     }
-    const ccSt  = tStatus(tCC,  lcCCBlend,  ccByRack);
-    const tfpSt = tStatus(tTFP, lcTFPBlend, tfpMinBlend);
+    // Build max blend lookups for CC and TFP
+    const ccMaxBlend=Object.fromEntries(Object.entries(ccByRack).map(([k,v])=>[k,v.max]));
+    const tfpMaxBlend=Object.fromEntries(Object.entries(tfpByRack).map(([k,v])=>[k,v.max]));
+    const ccSt  = tStatus(tCC,  lcCCBlend,  ccMaxBlend);
+    const tfpSt = tStatus(tTFP, lcTFPBlend, tfpMaxBlend);
     const order = {built:2,partial:1,pending:0};
     const overall = [ccSt,tfpSt].reduce((w,s)=>order[s]<order[w]?s:w,'built');
     const tfpBMin = tTFP.length ? Math.min(...tTFP.map(rk=>tfpByRack[rk].min)) : null;
